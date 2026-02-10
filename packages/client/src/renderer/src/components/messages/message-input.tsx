@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
-import { SendHorizontal } from "lucide-react";
+import { Plus, SendHorizontal } from "lucide-react";
 import { useMessageStore } from "@/stores/messages";
 
 interface MessageInputProps {
   channelId: string;
+  channelName?: string;
 }
 
-export function MessageInput({ channelId }: MessageInputProps) {
+export function MessageInput({ channelId, channelName }: MessageInputProps) {
   const [content, setContent] = useState("");
   const sendMessage = useMessageStore((s) => s.sendMessage);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -45,21 +46,26 @@ export function MessageInput({ channelId }: MessageInputProps) {
 
   return (
     <div className="px-4 pb-4 pt-1 shrink-0">
-      <div className="flex items-end gap-2 bg-secondary rounded-lg px-4 py-2">
+      <div className="relative">
+        <div className="absolute top-7 left-4">
+          <div className="w-7 h-7 rounded-full bg-muted-foreground/20 flex items-center justify-center">
+            <Plus className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
         <textarea
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
           onInput={handleInput}
-          placeholder="Send a message..."
-          className="flex-1 bg-transparent text-sm resize-none outline-none max-h-[200px] py-1 placeholder:text-muted-foreground"
+          placeholder={channelName ? `Message #${channelName}` : "Send a message..."}
+          className="w-full px-14 py-3 bg-muted/50 border-none rounded-lg text-sm resize-none outline-none max-h-[200px] placeholder:text-muted-foreground"
           rows={1}
         />
         <button
           onClick={handleSubmit}
           disabled={!content.trim()}
-          className="text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors pb-1"
+          className="absolute top-7 right-4 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
         >
           <SendHorizontal className="h-5 w-5" />
         </button>

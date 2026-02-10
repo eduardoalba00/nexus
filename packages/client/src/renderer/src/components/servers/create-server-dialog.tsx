@@ -43,16 +43,16 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create a server</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="p-0 overflow-hidden">
+        <DialogHeader className="pt-6 px-6">
+          <DialogTitle className="text-xl text-center font-bold">Create a server</DialogTitle>
+          <DialogDescription className="text-center">
             Give your new server a name. You can always change it later.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="server-name">Server name</Label>
+            <Label htmlFor="server-name" className="uppercase text-xs font-bold text-muted-foreground">Server name</Label>
             <Input
               id="server-name"
               value={name}
@@ -60,9 +60,10 @@ export function CreateServerDialog({ open, onOpenChange }: CreateServerDialogPro
               placeholder="My Awesome Server"
               maxLength={100}
               autoFocus
+              className="bg-muted/50 border-0 focus-visible:ring-0"
             />
           </div>
-          <div className="flex justify-end">
+          <div className="bg-muted/30 -mx-6 px-6 py-4 mt-6 flex justify-end">
             <Button type="submit" disabled={!name.trim() || loading}>
               {loading ? "Creating..." : "Create"}
             </Button>

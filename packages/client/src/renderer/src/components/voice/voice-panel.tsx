@@ -14,7 +14,7 @@ export function VoicePanel() {
   if (!currentChannelId) return null;
 
   return (
-    <div className="border-t border-border bg-background/50 px-3 py-2">
+    <div className="border-t border-border bg-card px-3 py-2">
       <div className="flex items-center gap-2 mb-2">
         <div
           className={cn(
@@ -30,7 +30,7 @@ export function VoicePanel() {
         <button
           onClick={toggleMute}
           className={cn(
-            "p-1.5 rounded hover:bg-secondary/80 transition-colors",
+            "p-2 rounded-md hover:bg-muted transition-colors",
             isMuted && "text-destructive",
           )}
           title={isMuted ? "Unmute" : "Mute"}
@@ -40,7 +40,7 @@ export function VoicePanel() {
         <button
           onClick={toggleDeafen}
           className={cn(
-            "p-1.5 rounded hover:bg-secondary/80 transition-colors",
+            "p-2 rounded-md hover:bg-muted transition-colors",
             isDeafened && "text-destructive",
           )}
           title={isDeafened ? "Undeafen" : "Deafen"}
@@ -49,7 +49,7 @@ export function VoicePanel() {
         </button>
         <button
           onClick={leaveChannel}
-          className="p-1.5 rounded hover:bg-destructive/20 text-destructive transition-colors ml-auto"
+          className="p-2 rounded-md hover:bg-destructive/20 text-destructive transition-colors ml-auto"
           title="Disconnect"
         >
           <PhoneOff className="h-4 w-4" />

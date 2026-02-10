@@ -11,7 +11,7 @@ export function VoiceUser({ user }: VoiceUserProps) {
     <div className="flex items-center gap-2 px-2 py-0.5">
       <div
         className={cn(
-          "w-6 h-6 rounded-full bg-primary/60 flex items-center justify-center text-[10px] font-semibold ring-2 transition-colors",
+          "w-6 h-6 rounded-full bg-sidebar-primary/60 flex items-center justify-center text-[10px] font-semibold ring-2 transition-colors",
           user.speaking ? "ring-green-500" : "ring-transparent",
         )}
       >

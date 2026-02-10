@@ -93,8 +93,8 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
         <button
           onClick={handleClick}
           className={cn(
-            "flex items-center gap-1.5 w-full px-2 py-1 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors",
-            !isVoice && activeChannelId === channel.id && "bg-secondary text-foreground",
+            "flex items-center gap-x-2 w-full px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
+            !isVoice && activeChannelId === channel.id && "bg-muted text-foreground",
             isInThisVoice && "text-green-500",
           )}
         >
@@ -122,7 +122,7 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
       <div className="mt-4">
         <button
           onClick={() => toggleCategory(category.id)}
-          className="flex items-center gap-0.5 px-1 w-full text-xs font-semibold uppercase text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-0.5 px-1 w-full text-xs font-bold uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors"
         >
           {isCollapsed ? (
             <ChevronRight className="h-3 w-3" />
@@ -144,13 +144,13 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
 
   return (
     <>
-      <div className="flex flex-col w-60 bg-card border-r border-border">
+      <div className="flex flex-col w-60 bg-card">
         {/* Server header dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center justify-between px-4 h-12 border-b border-border hover:bg-secondary/50 transition-colors">
+            <button className="flex items-center px-4 h-12 border-b-2 border-border hover:bg-muted/50 transition-colors">
               <span className="font-semibold truncate">{server?.name}</span>
-              <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+              <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-auto" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="start">
@@ -212,8 +212,8 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
         <VoicePanel />
 
         {/* User panel */}
-        <div className="flex items-center gap-2 px-3 py-2 border-t border-border bg-background/50">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-semibold">
+        <div className="flex items-center gap-2 px-3 py-2 border-t border-border bg-card">
+          <div className="w-8 h-8 rounded-full bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center text-xs font-semibold">
             {user?.displayName?.charAt(0).toUpperCase() || "?"}
           </div>
           <div className="flex-1 min-w-0">

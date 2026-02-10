@@ -32,49 +32,66 @@ export function ServerSidebar() {
 
   return (
     <>
-      <div className="flex flex-col items-center w-[72px] bg-background py-3 gap-2 border-r border-border overflow-y-auto">
-        {servers.map((server) => (
-          <Tooltip key={server.id}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => handleServerClick(server.id)}
-                className={cn(
-                  "relative w-12 h-12 rounded-[24px] bg-secondary flex items-center justify-center text-foreground font-semibold text-lg transition-all hover:rounded-[16px] hover:bg-primary",
-                  activeServerId === server.id && "rounded-[16px] bg-primary",
-                )}
-              >
-                {activeServerId === server.id && (
-                  <div className="absolute left-[-8px] w-1 h-10 bg-foreground rounded-r-full" />
-                )}
-                {server.name.charAt(0).toUpperCase()}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">{server.name}</TooltipContent>
-          </Tooltip>
-        ))}
+      <div className="flex flex-col items-center w-[72px] bg-sidebar py-3 gap-2 overflow-y-auto">
+        {servers.map((server) => {
+          const isActive = activeServerId === server.id;
+          return (
+            <Tooltip key={server.id}>
+              <TooltipTrigger asChild>
+                <div className="group relative flex items-center justify-center w-full">
+                  {/* Pill indicator */}
+                  <div
+                    className={cn(
+                      "absolute left-0 bg-sidebar-primary rounded-r-full w-[4px] transition-all",
+                      isActive
+                        ? "h-[36px]"
+                        : "h-[8px] group-hover:h-[20px]",
+                      !isActive && "opacity-0 group-hover:opacity-100",
+                    )}
+                  />
+                  <button
+                    onClick={() => handleServerClick(server.id)}
+                    className={cn(
+                      "relative h-[48px] w-[48px] rounded-[24px] bg-card flex items-center justify-center text-foreground font-semibold text-lg transition-all",
+                      "hover:rounded-[16px] hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
+                      isActive && "rounded-[16px] bg-sidebar-primary text-sidebar-primary-foreground",
+                    )}
+                  >
+                    {server.name.charAt(0).toUpperCase()}
+                  </button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right">{server.name}</TooltipContent>
+            </Tooltip>
+          );
+        })}
 
         <Separator className="w-8 my-1" />
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="w-12 h-12 rounded-[24px] bg-secondary flex items-center justify-center text-green-500 transition-all hover:rounded-[16px] hover:bg-green-500 hover:text-white"
-            >
-              <Plus className="h-6 w-6" />
-            </button>
+            <div className="group relative flex items-center justify-center w-full">
+              <button
+                onClick={() => setShowCreate(true)}
+                className="h-[48px] w-[48px] rounded-[24px] bg-card flex items-center justify-center text-green-500 transition-all hover:rounded-[16px] hover:bg-green-500 hover:text-white"
+              >
+                <Plus className="h-6 w-6" />
+              </button>
+            </div>
           </TooltipTrigger>
           <TooltipContent side="right">Create a server</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => setShowJoin(true)}
-              className="w-12 h-12 rounded-[24px] bg-secondary flex items-center justify-center text-green-500 transition-all hover:rounded-[16px] hover:bg-green-500 hover:text-white text-sm font-bold"
-            >
-              Join
-            </button>
+            <div className="group relative flex items-center justify-center w-full">
+              <button
+                onClick={() => setShowJoin(true)}
+                className="h-[48px] w-[48px] rounded-[24px] bg-card flex items-center justify-center text-green-500 transition-all hover:rounded-[16px] hover:bg-green-500 hover:text-white text-sm font-bold"
+              >
+                Join
+              </button>
+            </div>
           </TooltipTrigger>
           <TooltipContent side="right">Join a server</TooltipContent>
         </Tooltip>
@@ -83,12 +100,14 @@ export function ServerSidebar() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => setActiveWorkspace(null)}
-              className="w-12 h-12 rounded-[24px] bg-secondary flex items-center justify-center text-muted-foreground transition-all hover:rounded-[16px] hover:bg-accent hover:text-foreground"
-            >
-              <ArrowLeftRight className="h-5 w-5" />
-            </button>
+            <div className="group relative flex items-center justify-center w-full">
+              <button
+                onClick={() => setActiveWorkspace(null)}
+                className="h-[48px] w-[48px] rounded-[24px] bg-card flex items-center justify-center text-muted-foreground transition-all hover:rounded-[16px] hover:bg-sidebar-accent hover:text-foreground"
+              >
+                <ArrowLeftRight className="h-5 w-5" />
+              </button>
+            </div>
           </TooltipTrigger>
           <TooltipContent side="right">Switch workspace</TooltipContent>
         </Tooltip>

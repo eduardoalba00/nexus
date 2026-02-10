@@ -25,8 +25,10 @@ export function MainContent() {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center text-muted-foreground space-y-2">
-          <Hash className="h-12 w-12 mx-auto opacity-50" />
-          <p className="text-lg font-medium">Select a server</p>
+          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+            <Hash className="h-8 w-8" />
+          </div>
+          <p className="text-lg font-bold text-foreground">Select a server</p>
           <p className="text-sm">Choose a server from the sidebar to get started</p>
         </div>
       </div>
@@ -37,8 +39,10 @@ export function MainContent() {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center text-muted-foreground space-y-2">
-          <Hash className="h-12 w-12 mx-auto opacity-50" />
-          <p className="text-lg font-medium">Select a channel</p>
+          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+            <Hash className="h-8 w-8" />
+          </div>
+          <p className="text-lg font-bold text-foreground">Select a channel</p>
           <p className="text-sm">Choose a channel from the sidebar to start chatting</p>
         </div>
       </div>
@@ -48,8 +52,8 @@ export function MainContent() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <ChannelHeader channel={activeChannel} />
-      <MessageList channelId={activeChannel.id} />
-      <MessageInput channelId={activeChannel.id} />
+      <MessageList channelId={activeChannel.id} channelName={activeChannel.name} />
+      <MessageInput channelId={activeChannel.id} channelName={activeChannel.name} />
     </div>
   );
 }

@@ -15,8 +15,8 @@ export function WorkspacePicker() {
 
   return (
     <>
-      <div className="flex flex-1 items-center justify-center">
-        <Card className="w-[440px]">
+      <div className="flex flex-1 items-center justify-center bg-background">
+        <Card className="w-[440px] shadow-xl overflow-hidden">
           <CardHeader className="text-center">
             <CardTitle>Welcome to Nexus</CardTitle>
             <CardDescription>
@@ -34,7 +34,7 @@ export function WorkspacePicker() {
                     onClick={() => switchWorkspace(workspace.id)}
                     className={cn(
                       "w-full flex items-center gap-3 rounded-lg border border-border p-3 text-left transition-colors",
-                      "hover:bg-accent hover:text-accent-foreground",
+                      "hover:bg-muted hover:text-foreground",
                     )}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-lg">

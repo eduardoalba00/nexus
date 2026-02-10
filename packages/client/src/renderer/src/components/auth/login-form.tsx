@@ -31,15 +31,15 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
+    <Card className="w-full max-w-sm shadow-xl overflow-hidden p-0">
+      <CardHeader className="pt-8 px-6 text-center">
         <CardTitle className="text-2xl">Welcome back!</CardTitle>
         <CardDescription>We're so excited to see you again!</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="px-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="login-username" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="login-username" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Username
             </Label>
             <Input
@@ -50,11 +50,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 setUsername(e.target.value);
                 clearError();
               }}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="login-password" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Password
             </Label>
             <Input
@@ -65,12 +66,13 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 setPassword(e.target.value);
                 clearError();
               }}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
               required
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-4 bg-muted/30 px-6 py-4">
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Log In"}
           </Button>

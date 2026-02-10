@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { Titlebar } from "@/components/titlebar";
 import { AuthPage } from "@/pages/auth";
@@ -36,16 +37,18 @@ export default function App() {
   }, [activeWorkspaceId]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <Titlebar />
-      {!activeWorkspaceId ? (
-        <WorkspacePicker />
-      ) : isAuthenticated ? (
-        <AppShell />
-      ) : (
-        <AuthPage />
-      )}
-      <Toaster position="bottom-right" />
-    </div>
+    <ThemeProvider attribute="class" defaultTheme="dark" storageKey="nexus-theme">
+      <div className="flex flex-col h-screen">
+        <Titlebar />
+        {!activeWorkspaceId ? (
+          <WorkspacePicker />
+        ) : isAuthenticated ? (
+          <AppShell />
+        ) : (
+          <AuthPage />
+        )}
+        <Toaster position="bottom-right" />
+      </div>
+    </ThemeProvider>
   );
 }

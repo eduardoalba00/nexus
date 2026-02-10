@@ -42,16 +42,16 @@ export function CreateCategoryDialog({ open, onOpenChange, serverId }: CreateCat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create a category</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="p-0 overflow-hidden">
+        <DialogHeader className="pt-6 px-6">
+          <DialogTitle className="text-xl text-center font-bold">Create a category</DialogTitle>
+          <DialogDescription className="text-center">
             Categories help organize your channels.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="category-name">Category name</Label>
+            <Label htmlFor="category-name" className="uppercase text-xs font-bold text-muted-foreground">Category name</Label>
             <Input
               id="category-name"
               value={name}
@@ -59,9 +59,10 @@ export function CreateCategoryDialog({ open, onOpenChange, serverId }: CreateCat
               placeholder="General"
               maxLength={100}
               autoFocus
+              className="bg-muted/50 border-0 focus-visible:ring-0"
             />
           </div>
-          <div className="flex justify-end">
+          <div className="bg-muted/30 -mx-6 px-6 py-4 mt-6 flex justify-end">
             <Button type="submit" disabled={!name.trim() || loading}>
               {loading ? "Creating..." : "Create Category"}
             </Button>

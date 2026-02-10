@@ -50,14 +50,14 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const displayError = localError || error;
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
+    <Card className="w-full max-w-sm shadow-xl overflow-hidden p-0">
+      <CardHeader className="pt-8 px-6 text-center">
         <CardTitle className="text-2xl">Create an account</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+        <CardContent className="px-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="reg-username" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="reg-username" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Username <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -69,11 +69,12 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 clearError();
                 setLocalError(null);
               }}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-display-name" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="reg-display-name" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Display Name
             </Label>
             <Input
@@ -82,10 +83,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder={username || ""}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-password" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="reg-password" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Password <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -97,11 +99,12 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 clearError();
                 setLocalError(null);
               }}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-confirm-password" className="text-xs uppercase text-muted-foreground">
+            <Label htmlFor="reg-confirm-password" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
               Confirm Password <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -112,12 +115,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 setConfirmPassword(e.target.value);
                 setLocalError(null);
               }}
+              className="bg-muted/50 border-0 focus-visible:ring-0"
               required
             />
           </div>
           {displayError && <p className="text-sm text-destructive">{displayError}</p>}
         </CardContent>
-        <CardFooter className="flex flex-col gap-4">
+        <CardFooter className="flex flex-col gap-4 bg-muted/30 px-6 py-4">
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Continue"}
           </Button>

@@ -63,16 +63,16 @@ export function AddWorkspaceDialog({ open, onOpenChange }: AddWorkspaceDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add a workspace</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="p-0 overflow-hidden">
+        <DialogHeader className="pt-6 px-6">
+          <DialogTitle className="text-xl text-center font-bold">Add a workspace</DialogTitle>
+          <DialogDescription className="text-center">
             Connect to a Nexus server by entering its name and URL.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="workspace-name">Workspace name</Label>
+            <Label htmlFor="workspace-name" className="uppercase text-xs font-bold text-muted-foreground">Workspace name</Label>
             <Input
               id="workspace-name"
               value={name}
@@ -80,10 +80,11 @@ export function AddWorkspaceDialog({ open, onOpenChange }: AddWorkspaceDialogPro
               placeholder="My Workspace"
               maxLength={100}
               autoFocus
+              className="bg-muted/50 border-0 focus-visible:ring-0"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="workspace-url">Server URL</Label>
+            <Label htmlFor="workspace-url" className="uppercase text-xs font-bold text-muted-foreground">Server URL</Label>
             <Input
               id="workspace-url"
               value={url}
@@ -92,12 +93,13 @@ export function AddWorkspaceDialog({ open, onOpenChange }: AddWorkspaceDialogPro
                 setError(null);
               }}
               placeholder="http://localhost:8080"
+              className="bg-muted/50 border-0 focus-visible:ring-0"
             />
           </div>
           {error && (
             <p className="text-sm text-destructive">{error}</p>
           )}
-          <div className="flex justify-end">
+          <div className="bg-muted/30 -mx-6 px-6 py-4 mt-6 flex justify-end">
             <Button type="submit" disabled={!name.trim() || !url.trim() || loading}>
               {loading ? "Connecting..." : "Add Workspace"}
             </Button>

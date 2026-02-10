@@ -56,21 +56,21 @@ export function InviteDialog({ open, onOpenChange, serverId }: InviteDialogProps
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Invite people</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="p-0 overflow-hidden">
+        <DialogHeader className="pt-6 px-6">
+          <DialogTitle className="text-xl text-center font-bold">Invite people</DialogTitle>
+          <DialogDescription className="text-center">
             Share the invite code with others so they can join the server.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="px-6 space-y-4">
           {!invite ? (
             <Button onClick={createInvite} disabled={loading} className="w-full">
               {loading ? "Generating..." : "Generate Invite Code"}
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-secondary rounded-md px-4 py-3 font-mono text-lg text-center select-all">
+              <div className="flex-1 bg-muted/50 rounded-md px-4 py-3 font-mono text-lg text-center select-all">
                 {invite.code}
               </div>
               <Button size="icon" variant="secondary" onClick={copyCode}>
@@ -78,6 +78,7 @@ export function InviteDialog({ open, onOpenChange, serverId }: InviteDialogProps
               </Button>
             </div>
           )}
+          <div className="bg-muted/30 -mx-6 px-6 py-4 mt-6" />
         </div>
       </DialogContent>
     </Dialog>

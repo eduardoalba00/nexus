@@ -6,7 +6,7 @@ export function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
 
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-1 items-center justify-center bg-background">
       {mode === "login" ? (
         <LoginForm onSwitchToRegister={() => setMode("register")} />
       ) : (

@@ -9,7 +9,7 @@ export function AppLayout() {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden bg-background">
         <ServerSidebar />
         {activeServerId && <ChannelSidebar serverId={activeServerId} />}
         <MainContent />

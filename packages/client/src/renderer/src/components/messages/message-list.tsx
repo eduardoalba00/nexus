@@ -2,15 +2,16 @@ import { useEffect, useRef, useCallback } from "react";
 import { useMessageStore } from "@/stores/messages";
 import type { Message } from "@nexus/shared";
 import { MessageItem } from "@/components/messages/message-item";
-import { Loader2 } from "lucide-react";
+import { Loader2, Hash } from "lucide-react";
 
 const EMPTY_MESSAGES: Message[] = [];
 
 interface MessageListProps {
   channelId: string;
+  channelName?: string;
 }
 
-export function MessageList({ channelId }: MessageListProps) {
+export function MessageList({ channelId, channelName }: MessageListProps) {
   const messages = useMessageStore((s) => s.messagesByChannel[channelId] ?? EMPTY_MESSAGES);
   const hasMore = useMessageStore((s) => s.hasMore[channelId] ?? true);
   const fetchMessages = useMessageStore((s) => s.fetchMessages);
@@ -62,11 +63,22 @@ export function MessageList({ channelId }: MessageListProps) {
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto px-4 py-2"
+      className="flex-1 flex flex-col overflow-y-auto"
     >
       {hasMore && messages.length > 0 && (
         <div className="flex justify-center py-2">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      {!hasMore && channelName && (
+        <div className="px-4 pt-8 pb-4">
+          <div className="h-[68px] w-[68px] rounded-full bg-muted flex items-center justify-center mb-4">
+            <Hash className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <h1 className="text-3xl font-bold">Welcome to #{channelName}</h1>
+          <p className="text-muted-foreground mt-1">
+            This is the start of the #{channelName} channel.
+          </p>
         </div>
       )}
       {messages.map((message, i) => {
