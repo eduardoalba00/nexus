@@ -3,6 +3,7 @@ export * from "./types/auth.js";
 export * from "./types/server.js";
 export * from "./types/message.js";
 export * from "./types/ws.js";
+export * from "./types/voice.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/server.js";
 export * from "./schemas/message.js";

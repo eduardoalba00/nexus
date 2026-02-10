@@ -5,6 +5,9 @@ import type { AuthService } from "../services/auth.js";
 import type { AppDatabase } from "../db/index.js";
 import { serverMembers } from "../db/schema/servers.js";
 import type { ConnectionManager } from "./connection.js";
+import type { MediasoupManager } from "../voice/mediasoup-manager.js";
+import type { VoiceStateManager } from "../voice/state.js";
+import { handleVoiceStateUpdate, handleVoiceSignal, handleLeave } from "../voice/protocol.js";
 
 const HEARTBEAT_INTERVAL = 30_000;
 const HEARTBEAT_TIMEOUT = 45_000;
@@ -14,6 +17,8 @@ export function handleConnection(
   db: AppDatabase,
   authService: AuthService,
   connectionManager: ConnectionManager,
+  mediasoupManager: MediasoupManager,
+  voiceStateManager: VoiceStateManager,
 ) {
   let userId: string | null = null;
   let identified = false;
@@ -86,11 +91,23 @@ export function handleConnection(
       );
       return;
     }
+
+    if (msg.op === WsOpcode.VOICE_STATE_UPDATE && identified && userId) {
+      handleVoiceStateUpdate(socket, userId, msg, mediasoupManager, voiceStateManager, connectionManager);
+      return;
+    }
+
+    if (msg.op === WsOpcode.VOICE_SIGNAL && identified && userId) {
+      handleVoiceSignal(socket, userId, msg, mediasoupManager, voiceStateManager, connectionManager);
+      return;
+    }
   });
 
   socket.on("close", () => {
     clearTimeout(identifyTimeout);
     if (userId) {
+      // Auto-leave voice channel on disconnect
+      handleLeave(userId, mediasoupManager, voiceStateManager, connectionManager);
       connectionManager.remove(userId);
     }
   });

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Hash, Volume2, Plus, LogOut, Link, Settings, Trash2 } from "lucide-react";
 import { useServerStore } from "@/stores/servers";
 import { useChannelStore } from "@/stores/channels";
+import { useVoiceStore } from "@/stores/voice";
 import { useAuthStore } from "@/stores/auth";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +16,8 @@ import {
 import { CreateChannelDialog } from "@/components/channels/create-channel-dialog";
 import { CreateCategoryDialog } from "@/components/channels/create-category-dialog";
 import { InviteDialog } from "@/components/channels/invite-dialog";
+import { VoicePanel } from "@/components/voice/voice-panel";
+import { VoiceUser } from "@/components/voice/voice-user";
 import { cn } from "@/lib/utils";
 import type { Channel, CategoryWithChannels } from "@nexus/shared";
 
@@ -64,22 +67,54 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
     setActiveServer(null);
   };
 
-  const ChannelItem = ({ channel }: { channel: Channel }) => (
-    <button
-      onClick={() => setActiveChannel(channel.id)}
-      className={cn(
-        "flex items-center gap-1.5 w-full px-2 py-1 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors",
-        activeChannelId === channel.id && "bg-secondary text-foreground",
-      )}
-    >
-      {channel.type === "voice" ? (
-        <Volume2 className="h-4 w-4 shrink-0 opacity-50" />
-      ) : (
-        <Hash className="h-4 w-4 shrink-0 opacity-50" />
-      )}
-      <span className="truncate">{channel.name}</span>
-    </button>
-  );
+  const voiceChannelId = useVoiceStore((s) => s.currentChannelId);
+  const voiceParticipants = useVoiceStore((s) => s.participants);
+  const joinVoice = useVoiceStore((s) => s.joinChannel);
+
+  const ChannelItem = ({ channel }: { channel: Channel }) => {
+    const isVoice = channel.type === "voice";
+    const isInThisVoice = voiceChannelId === channel.id;
+
+    const handleClick = () => {
+      if (isVoice) {
+        joinVoice(channel.id, serverId);
+      } else {
+        setActiveChannel(channel.id);
+      }
+    };
+
+    // Get participants for this voice channel
+    const participants = isVoice && isInThisVoice
+      ? Array.from(voiceParticipants.values())
+      : [];
+
+    return (
+      <div>
+        <button
+          onClick={handleClick}
+          className={cn(
+            "flex items-center gap-1.5 w-full px-2 py-1 rounded text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors",
+            !isVoice && activeChannelId === channel.id && "bg-secondary text-foreground",
+            isInThisVoice && "text-green-500",
+          )}
+        >
+          {isVoice ? (
+            <Volume2 className="h-4 w-4 shrink-0 opacity-50" />
+          ) : (
+            <Hash className="h-4 w-4 shrink-0 opacity-50" />
+          )}
+          <span className="truncate">{channel.name}</span>
+        </button>
+        {participants.length > 0 && (
+          <div className="ml-4 mt-0.5 space-y-0.5">
+            {participants.map((p) => (
+              <VoiceUser key={p.userId} user={p} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const CategorySection = ({ category }: { category: CategoryWithChannels }) => {
     const isCollapsed = collapsedCategories.has(category.id);
@@ -172,6 +207,9 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
             ))}
           </div>
         </ScrollArea>
+
+        {/* Voice panel */}
+        <VoicePanel />
 
         {/* User panel */}
         <div className="flex items-center gap-2 px-3 py-2 border-t border-border bg-background/50">

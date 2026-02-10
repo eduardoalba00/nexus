@@ -8,6 +8,9 @@ export interface Config {
   jwtRefreshSecret: string;
   accessTokenExpiry: string;
   refreshTokenExpiry: string;
+  rtcMinPort: number;
+  rtcMaxPort: number;
+  rtcAnnouncedIp: string | undefined;
 }
 
 export function loadConfig(): Config {
@@ -19,5 +22,8 @@ export function loadConfig(): Config {
     jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || crypto.randomBytes(32).toString("hex"),
     accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || "15m",
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || "7d",
+    rtcMinPort: parseInt(process.env.RTC_MIN_PORT || "10000", 10),
+    rtcMaxPort: parseInt(process.env.RTC_MAX_PORT || "10100", 10),
+    rtcAnnouncedIp: process.env.RTC_ANNOUNCED_IP || undefined,
   };
 }

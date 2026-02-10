@@ -2,6 +2,7 @@ import { WsOpcode } from "@nexus/shared";
 import type { WsServerMessage, WsDispatch } from "@nexus/shared";
 
 export type DispatchHandler = (event: WsDispatch) => void;
+export type VoiceSignalHandler = (msg: any) => void;
 
 export class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -11,6 +12,7 @@ export class WebSocketManager {
   private maxReconnectAttempts = 10;
   private token: string | null = null;
   private dispatchHandler: DispatchHandler | null = null;
+  private voiceSignalHandler: VoiceSignalHandler | null = null;
   private onStatusChange: ((connected: boolean) => void) | null = null;
   private intentionalClose = false;
 
@@ -32,6 +34,16 @@ export class WebSocketManager {
 
   setStatusChangeHandler(handler: (connected: boolean) => void) {
     this.onStatusChange = handler;
+  }
+
+  setVoiceSignalHandler(handler: VoiceSignalHandler) {
+    this.voiceSignalHandler = handler;
+  }
+
+  send(data: unknown) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
   }
 
   private doConnect() {
@@ -73,6 +85,11 @@ export class WebSocketManager {
 
       if ((msg as any).op === WsOpcode.DISPATCH) {
         this.dispatchHandler?.(msg as WsDispatch);
+        return;
+      }
+
+      if ((msg as any).op === WsOpcode.VOICE_SIGNAL) {
+        this.voiceSignalHandler?.(msg);
         return;
       }
     };

@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { DispatchEvent } from "@nexus/shared";
-import type { WsDispatch, Message, Channel, ServerMember, MessageDeleteData, MemberLeaveData } from "@nexus/shared";
+import type { WsDispatch, Message, Channel, ServerMember, MessageDeleteData, MemberLeaveData, VoiceState } from "@nexus/shared";
 import { wsManager } from "@/lib/ws";
 import { useChannelStore } from "./channels";
 import { useMessageStore } from "./messages";
 import { useServerStore } from "./servers";
+import { useVoiceStore } from "./voice";
 
 interface WsState {
   connected: boolean;
@@ -46,6 +47,9 @@ export const useWsStore = create<WsState>()((set) => ({
           break;
         case DispatchEvent.MEMBER_LEAVE:
           // Could remove server from list if it's us leaving
+          break;
+        case DispatchEvent.VOICE_STATE_UPDATE:
+          useVoiceStore.getState().handleVoiceStateUpdate(event.d as VoiceState);
           break;
       }
     });

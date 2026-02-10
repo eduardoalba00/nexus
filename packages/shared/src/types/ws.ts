@@ -1,6 +1,7 @@
 import type { Channel } from "./server.js";
 import type { Message } from "./message.js";
 import type { ServerMember } from "./server.js";
+import type { VoiceState, VoiceSignalAction } from "./voice.js";
 
 export const WsOpcode = {
   DISPATCH: 0,
@@ -8,6 +9,8 @@ export const WsOpcode = {
   HEARTBEAT: 2,
   HEARTBEAT_ACK: 3,
   READY: 4,
+  VOICE_STATE_UPDATE: 5,
+  VOICE_SIGNAL: 6,
 } as const;
 
 export type WsOpcode = (typeof WsOpcode)[keyof typeof WsOpcode];
@@ -21,6 +24,7 @@ export const DispatchEvent = {
   CHANNEL_DELETE: "CHANNEL_DELETE",
   MEMBER_JOIN: "MEMBER_JOIN",
   MEMBER_LEAVE: "MEMBER_LEAVE",
+  VOICE_STATE_UPDATE: "VOICE_STATE_UPDATE",
 } as const;
 
 export type DispatchEvent = (typeof DispatchEvent)[keyof typeof DispatchEvent];
@@ -62,7 +66,36 @@ export interface MemberLeaveData {
   serverId: string;
 }
 
-export type WsClientMessage = WsIdentify | WsHeartbeat;
+export interface WsVoiceStateUpdate {
+  op: typeof WsOpcode.VOICE_STATE_UPDATE;
+  d: {
+    channelId: string | null;
+    serverId: string;
+    muted?: boolean;
+    deafened?: boolean;
+  };
+}
+
+export interface WsVoiceSignal {
+  op: typeof WsOpcode.VOICE_SIGNAL;
+  d: {
+    requestId: string;
+    action: VoiceSignalAction;
+    data?: any;
+  };
+}
+
+export interface WsVoiceSignalResponse {
+  op: typeof WsOpcode.VOICE_SIGNAL;
+  d: {
+    requestId: string;
+    action: VoiceSignalAction;
+    data?: any;
+    error?: string;
+  };
+}
+
+export type WsClientMessage = WsIdentify | WsHeartbeat | WsVoiceStateUpdate | WsVoiceSignal;
 
 export type WsServerMessage =
   | WsHeartbeatAck
@@ -72,4 +105,6 @@ export type WsServerMessage =
   | WsDispatch<Channel>
   | WsDispatch<{ id: string; serverId: string }>
   | WsDispatch<ServerMember>
-  | WsDispatch<MemberLeaveData>;
+  | WsDispatch<MemberLeaveData>
+  | WsDispatch<VoiceState>
+  | WsVoiceSignalResponse;

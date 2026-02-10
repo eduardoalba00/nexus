@@ -30,7 +30,7 @@ export async function buildApp(config: Config, db: AppDatabase) {
   const serverService = new ServerService(db);
 
   // WebSocket setup
-  const { pubsub, connectionManager } = await createWsHandler(app, db, authService);
+  const { pubsub, connectionManager } = await createWsHandler(app, db, authService, config);
 
   // Routes
   await app.register(authRoutes(db, authService));
