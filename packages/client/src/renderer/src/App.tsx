@@ -10,10 +10,10 @@ export default function App() {
   const isAuthenticated = !!user && !!tokens;
 
   useEffect(() => {
-    if (tokens && !user) {
+    if (tokens) {
       fetchMe();
     }
-  }, [tokens, user, fetchMe]);
+  }, []);
 
   return (
     <div className="flex flex-col h-screen">

@@ -102,6 +102,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "nexus-auth",
       partialize: (state) => ({ tokens: state.tokens, user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.tokens?.accessToken) {
+          api.setAccessToken(state.tokens.accessToken);
+        }
+      },
     },
   ),
 );

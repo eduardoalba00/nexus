@@ -1,0 +1,120 @@
+import { create } from "zustand";
+import type { ServerChannelList, Channel, Category } from "@nexus/shared";
+import { SERVER_ROUTES, buildRoute } from "@nexus/shared";
+import { api } from "@/lib/api";
+
+interface ChannelState {
+  channelList: ServerChannelList | null;
+  activeChannelId: string | null;
+
+  fetchChannels: (serverId: string) => Promise<void>;
+  createChannel: (serverId: string, data: { name: string; type?: string; categoryId?: string }) => Promise<Channel>;
+  createCategory: (serverId: string, name: string) => Promise<Category>;
+  deleteChannel: (serverId: string, channelId: string) => Promise<void>;
+  deleteCategory: (serverId: string, categoryId: string) => Promise<void>;
+  setActiveChannel: (channelId: string | null) => void;
+  clearChannels: () => void;
+  handleChannelCreate: (channel: Channel) => void;
+  handleChannelUpdate: (channel: Channel) => void;
+  handleChannelDelete: (data: { id: string; serverId: string }) => void;
+}
+
+export const useChannelStore = create<ChannelState>()((set, get) => ({
+  channelList: null,
+  activeChannelId: null,
+
+  fetchChannels: async (serverId) => {
+    const channelList = await api.get<ServerChannelList>(
+      buildRoute(SERVER_ROUTES.CHANNELS_LIST, { serverId }),
+    );
+    set({ channelList });
+  },
+
+  createChannel: async (serverId, data) => {
+    const channel = await api.post<Channel>(
+      buildRoute(SERVER_ROUTES.CHANNELS_CREATE, { serverId }),
+      data,
+    );
+    return channel;
+  },
+
+  createCategory: async (serverId, name) => {
+    const category = await api.post<Category>(
+      buildRoute(SERVER_ROUTES.CATEGORIES_CREATE, { serverId }),
+      { name },
+    );
+    // Refresh the channel list
+    await get().fetchChannels(serverId);
+    return category;
+  },
+
+  deleteChannel: async (serverId, channelId) => {
+    await api.delete(
+      buildRoute(SERVER_ROUTES.CHANNELS_DELETE, { serverId, channelId }),
+    );
+  },
+
+  deleteCategory: async (serverId, categoryId) => {
+    await api.delete(
+      buildRoute(SERVER_ROUTES.CATEGORIES_DELETE, { serverId, categoryId }),
+    );
+    await get().fetchChannels(serverId);
+  },
+
+  setActiveChannel: (channelId) => set({ activeChannelId: channelId }),
+
+  clearChannels: () => set({ channelList: null, activeChannelId: null }),
+
+  handleChannelCreate: (channel) => {
+    set((s) => {
+      if (!s.channelList) return s;
+      const list = { ...s.channelList };
+      if (channel.categoryId) {
+        list.categories = list.categories.map((cat) =>
+          cat.id === channel.categoryId
+            ? { ...cat, channels: [...cat.channels, channel] }
+            : cat,
+        );
+      } else {
+        list.uncategorized = [...list.uncategorized, channel];
+      }
+      return { channelList: list };
+    });
+  },
+
+  handleChannelUpdate: (channel) => {
+    set((s) => {
+      if (!s.channelList) return s;
+      const updateInList = (channels: Channel[]) =>
+        channels.map((ch) => (ch.id === channel.id ? channel : ch));
+      return {
+        channelList: {
+          uncategorized: updateInList(s.channelList.uncategorized),
+          categories: s.channelList.categories.map((cat) => ({
+            ...cat,
+            channels: updateInList(cat.channels),
+          })),
+        },
+      };
+    });
+  },
+
+  handleChannelDelete: (data) => {
+    set((s) => {
+      if (!s.channelList) return s;
+      const filterOut = (channels: Channel[]) =>
+        channels.filter((ch) => ch.id !== data.id);
+      return {
+        channelList: {
+          uncategorized: filterOut(s.channelList.uncategorized),
+          categories: s.channelList.categories.map((cat) => ({
+            ...cat,
+            channels: filterOut(cat.channels),
+          })),
+        },
+        activeChannelId:
+          s.activeChannelId === data.id ? null : s.activeChannelId,
+      };
+    });
+  },
+}));

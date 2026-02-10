@@ -27,6 +27,8 @@ export class ApiClient {
       throw new ApiError(response.status, body.error || "Request failed");
     }
 
+    if (response.status === 204) return undefined as T;
+
     return response.json();
   }
 
@@ -39,6 +41,24 @@ export class ApiClient {
 
   async get<T>(path: string): Promise<T> {
     return this.fetch<T>(path);
+  }
+
+  async patch<T>(path: string, body: unknown): Promise<T> {
+    return this.fetch<T>(path, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async put<T>(path: string, body: unknown): Promise<T> {
+    return this.fetch<T>(path, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async delete<T = void>(path: string): Promise<T> {
+    return this.fetch<T>(path, { method: "DELETE" });
   }
 }
 
