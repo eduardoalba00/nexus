@@ -17,10 +17,32 @@ interface ScreenAPI {
   getSources: () => Promise<ScreenSource[]>;
 }
 
+interface UpdaterStatus {
+  status: "checking" | "available" | "not-available" | "downloaded" | "error";
+  version?: string;
+  error?: string;
+}
+
+interface UpdaterProgress {
+  percent: number;
+  bytesPerSecond: number;
+  transferred: number;
+  total: number;
+}
+
+interface UpdaterAPI {
+  onStatus: (callback: (data: UpdaterStatus) => void) => () => void;
+  onProgress: (callback: (data: UpdaterProgress) => void) => () => void;
+  install: () => void;
+  check: () => Promise<unknown>;
+  getVersion: () => Promise<string>;
+}
+
 declare global {
   interface Window {
     windowAPI: WindowAPI;
     screenAPI: ScreenAPI;
+    updaterAPI: UpdaterAPI;
   }
 }
 

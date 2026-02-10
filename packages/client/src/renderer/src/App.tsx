@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { Titlebar } from "@/components/titlebar";
+import { UpdateNotification } from "@/components/layout/update-notification";
 import { AuthPage } from "@/pages/auth";
 import { AppShell } from "@/pages/app-shell";
 import { WorkspacePicker } from "@/pages/workspace-picker";
@@ -40,6 +41,7 @@ export default function App() {
     <ThemeProvider attribute="class" defaultTheme="dark" storageKey="nexus-theme">
       <div className="flex flex-col h-screen">
         <Titlebar />
+        <UpdateNotification />
         {!activeWorkspaceId ? (
           <WorkspacePicker />
         ) : isAuthenticated ? (

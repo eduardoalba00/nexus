@@ -1,12 +1,14 @@
 import { app, shell, BrowserWindow, ipcMain, desktopCapturer } from "electron";
 import { join } from "path";
 import { is } from "@electron-toolkit/utils";
+import electronUpdater from "electron-updater";
+const { autoUpdater } = electronUpdater;
 
 if (process.env.NEXUS_INSTANCE) {
   app.setPath("userData", app.getPath("userData") + "-" + process.env.NEXUS_INSTANCE);
 }
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -70,13 +72,78 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
+
+  return mainWindow;
+}
+
+function setupAutoUpdater(mainWindow: BrowserWindow): void {
+  if (is.dev) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  const send = (channel: string, data: unknown) => {
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(channel, data);
+    }
+  };
+
+  autoUpdater.on("checking-for-update", () => {
+    send("updater:status", { status: "checking" });
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    send("updater:status", { status: "available", version: info.version });
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    send("updater:status", { status: "not-available" });
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    send("updater:progress", {
+      percent: progress.percent,
+      bytesPerSecond: progress.bytesPerSecond,
+      transferred: progress.transferred,
+      total: progress.total,
+    });
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    send("updater:status", { status: "downloaded", version: info.version });
+  });
+
+  autoUpdater.on("error", (err) => {
+    send("updater:status", { status: "error", error: err.message });
+  });
+
+  ipcMain.on("updater:install", () => {
+    autoUpdater.quitAndInstall();
+  });
+
+  ipcMain.handle("updater:check", () => {
+    return autoUpdater.checkForUpdates();
+  });
+
+  ipcMain.handle("updater:getVersion", () => {
+    return app.getVersion();
+  });
+
+  // Check for updates 5 seconds after launch
+  setTimeout(() => {
+    autoUpdater.checkForUpdates().catch(() => {});
+  }, 5000);
 }
 
 app.whenReady().then(() => {
-  createWindow();
+  const mainWindow = createWindow();
+  setupAutoUpdater(mainWindow);
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      const win = createWindow();
+      setupAutoUpdater(win);
+    }
   });
 });
 

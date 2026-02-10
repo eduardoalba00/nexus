@@ -21,3 +21,21 @@ const screenAPI = {
 };
 
 contextBridge.exposeInMainWorld("screenAPI", screenAPI);
+
+const updaterAPI = {
+  onStatus: (callback: (data: unknown) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: unknown) => callback(data);
+    ipcRenderer.on("updater:status", handler);
+    return () => ipcRenderer.removeListener("updater:status", handler);
+  },
+  onProgress: (callback: (data: unknown) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: unknown) => callback(data);
+    ipcRenderer.on("updater:progress", handler);
+    return () => ipcRenderer.removeListener("updater:progress", handler);
+  },
+  install: () => ipcRenderer.send("updater:install"),
+  check: () => ipcRenderer.invoke("updater:check"),
+  getVersion: () => ipcRenderer.invoke("updater:getVersion") as Promise<string>,
+};
+
+contextBridge.exposeInMainWorld("updaterAPI", updaterAPI);

@@ -18,3 +18,7 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+publish:
+  provider: github
+  owner: eduardoalba00
+  repo: nexus
