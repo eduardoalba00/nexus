@@ -1,0 +1,28 @@
+{
+  "name": "@nexus/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --conditions @nexus/source src/index.ts",
+    "build": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@libsql/client": "^0.15.7",
+    "@nexus/shared": "workspace:*",
+    "argon2": "^0.43.0",
+    "drizzle-orm": "^0.44.1",
+    "fastify": "^5.3.3",
+    "jose": "^6.0.11",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.1",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

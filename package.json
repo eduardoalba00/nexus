@@ -1,0 +1,12 @@
+{
+  "name": "nexus",
+  "private": true,
+  "scripts": {
+    "dev:server": "pnpm --filter @nexus/server dev",
+    "dev:client": "pnpm --filter @nexus/client dev",
+    "build:server": "pnpm --filter @nexus/server build",
+    "build:client": "pnpm --filter @nexus/client build",
+    "db:generate": "pnpm --filter @nexus/server db:generate",
+    "db:migrate": "pnpm --filter @nexus/server db:migrate"
+  }
+}
