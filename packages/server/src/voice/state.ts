@@ -88,6 +88,26 @@ export class VoiceStateManager {
     return !channelUsers || channelUsers.size === 0;
   }
 
+  /** Get all active voice states for users in the given server IDs */
+  getStatesForServers(serverIds: string[]): Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean }> {
+    const serverSet = new Set(serverIds);
+    const result: Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean }> = [];
+    for (const [, channelUsers] of this.channels) {
+      for (const [, participant] of channelUsers) {
+        if (serverSet.has(participant.serverId)) {
+          result.push({
+            userId: participant.userId,
+            channelId: participant.channelId,
+            serverId: participant.serverId,
+            muted: participant.muted,
+            deafened: participant.deafened,
+          });
+        }
+      }
+    }
+    return result;
+  }
+
   private removeFromChannel(userId: string, channelId: string): void {
     const channelUsers = this.channels.get(channelId);
     if (!channelUsers) return;

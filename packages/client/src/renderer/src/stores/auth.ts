@@ -59,6 +59,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         displayName,
       });
       api.setAccessToken(data.tokens.accessToken);
+      (window as any).__nexusUserId = data.user.id;
       set({ user: data.user, tokens: data.tokens, isLoading: false });
       persistAuth(data.tokens, data.user);
     } catch (e) {
@@ -76,6 +77,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         password,
       });
       api.setAccessToken(data.tokens.accessToken);
+      (window as any).__nexusUserId = data.user.id;
       set({ user: data.user, tokens: data.tokens, isLoading: false });
       persistAuth(data.tokens, data.user);
     } catch (e) {
@@ -139,6 +141,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const { tokens, user } = JSON.parse(raw);
       if (tokens?.accessToken) {
         api.setAccessToken(tokens.accessToken);
+        if (user?.id) (window as any).__nexusUserId = user.id;
         set({ user, tokens });
       }
     } catch {

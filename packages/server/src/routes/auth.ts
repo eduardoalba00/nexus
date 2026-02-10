@@ -122,5 +122,57 @@ export function authRoutes(db: AppDatabase, authService: AuthService) {
 
       return reply.status(200).send({ user: userToPublic(user) });
     });
+
+    // PATCH /api/auth/me — update profile
+    app.patch(AUTH_ROUTES.ME, { preHandler: requireAuth }, async (request, reply) => {
+      const user = await db.select().from(users).where(eq(users.id, request.user.sub)).get();
+      if (!user) {
+        return reply.status(404).send({ error: "User not found" });
+      }
+
+      const body = request.body as Record<string, unknown>;
+      const updates: Record<string, unknown> = {};
+      if (typeof body.displayName === "string" && body.displayName.trim()) updates.displayName = body.displayName.trim();
+      if (typeof body.avatarUrl === "string" || body.avatarUrl === null) updates.avatarUrl = body.avatarUrl;
+      if (typeof body.customStatus === "string" || body.customStatus === null) updates.customStatus = body.customStatus;
+      if (typeof body.status === "string" && ["online", "idle", "dnd", "offline"].includes(body.status)) updates.status = body.status;
+
+      if (Object.keys(updates).length === 0) {
+        return reply.status(400).send({ error: "No valid fields to update" });
+      }
+
+      updates.updatedAt = new Date();
+
+      await db.update(users).set(updates).where(eq(users.id, request.user.sub)).run();
+
+      const updated = (await db.select().from(users).where(eq(users.id, request.user.sub)).get())!;
+      return reply.status(200).send({ user: userToPublic(updated) });
+    });
+
+    // POST /api/auth/change-password
+    app.post("/api/auth/change-password", { preHandler: requireAuth }, async (request, reply) => {
+      const user = await db.select().from(users).where(eq(users.id, request.user.sub)).get();
+      if (!user) {
+        return reply.status(404).send({ error: "User not found" });
+      }
+
+      const body = request.body as { currentPassword: string; newPassword: string };
+      if (!body.currentPassword || !body.newPassword) {
+        return reply.status(400).send({ error: "Current and new passwords required" });
+      }
+      if (body.newPassword.length < 8) {
+        return reply.status(400).send({ error: "New password must be at least 8 characters" });
+      }
+
+      const valid = await authService.verifyPassword(user.passwordHash, body.currentPassword);
+      if (!valid) {
+        return reply.status(401).send({ error: "Current password is incorrect" });
+      }
+
+      const passwordHash = await authService.hashPassword(body.newPassword);
+      await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, request.user.sub)).run();
+
+      return reply.status(200).send({ message: "Password changed successfully" });
+    });
   };
 }

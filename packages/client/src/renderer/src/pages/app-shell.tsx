@@ -12,6 +12,10 @@ export function AppShell() {
 
   useEffect(() => {
     fetchServers();
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
   }, [fetchServers]);
 
   useEffect(() => {

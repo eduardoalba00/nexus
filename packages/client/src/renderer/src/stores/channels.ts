@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import type { ServerChannelList, Channel, Category } from "@nexus/shared";
-import { SERVER_ROUTES, buildRoute } from "@nexus/shared";
+import { SERVER_ROUTES, READ_STATE_ROUTES, buildRoute } from "@nexus/shared";
 import { api } from "@/lib/api";
 
 interface ChannelState {
   channelList: ServerChannelList | null;
   activeChannelId: string | null;
+  unreadChannels: Set<string>;
 
   fetchChannels: (serverId: string) => Promise<void>;
   createChannel: (serverId: string, data: { name: string; type?: string; categoryId?: string }) => Promise<Channel>;
@@ -17,11 +18,14 @@ interface ChannelState {
   handleChannelCreate: (channel: Channel) => void;
   handleChannelUpdate: (channel: Channel) => void;
   handleChannelDelete: (data: { id: string; serverId: string }) => void;
+  markUnread: (channelId: string) => void;
+  markRead: (channelId: string, messageId: string) => void;
 }
 
 export const useChannelStore = create<ChannelState>()((set, get) => ({
   channelList: null,
   activeChannelId: null,
+  unreadChannels: new Set<string>(),
 
   fetchChannels: async (serverId) => {
     const channelList = await api.get<ServerChannelList>(
@@ -63,7 +67,7 @@ export const useChannelStore = create<ChannelState>()((set, get) => ({
 
   setActiveChannel: (channelId) => set({ activeChannelId: channelId }),
 
-  clearChannels: () => set({ channelList: null, activeChannelId: null }),
+  clearChannels: () => set({ channelList: null, activeChannelId: null, unreadChannels: new Set() }),
 
   handleChannelCreate: (channel) => {
     set((s) => {
@@ -116,5 +120,25 @@ export const useChannelStore = create<ChannelState>()((set, get) => ({
           s.activeChannelId === data.id ? null : s.activeChannelId,
       };
     });
+  },
+
+  markUnread: (channelId) => {
+    set((s) => {
+      // Don't mark current channel as unread
+      if (s.activeChannelId === channelId) return s;
+      const next = new Set(s.unreadChannels);
+      next.add(channelId);
+      return { unreadChannels: next };
+    });
+  },
+
+  markRead: (channelId, messageId) => {
+    set((s) => {
+      const next = new Set(s.unreadChannels);
+      next.delete(channelId);
+      return { unreadChannels: next };
+    });
+    // Send ack to server
+    api.post(buildRoute(READ_STATE_ROUTES.ACK, { channelId }), { messageId }).catch(() => {});
   },
 }));

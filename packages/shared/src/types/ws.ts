@@ -11,6 +11,7 @@ export const WsOpcode = {
   READY: 4,
   VOICE_STATE_UPDATE: 5,
   VOICE_SIGNAL: 6,
+  TYPING_START: 7,
 } as const;
 
 export type WsOpcode = (typeof WsOpcode)[keyof typeof WsOpcode];
@@ -25,6 +26,15 @@ export const DispatchEvent = {
   MEMBER_JOIN: "MEMBER_JOIN",
   MEMBER_LEAVE: "MEMBER_LEAVE",
   VOICE_STATE_UPDATE: "VOICE_STATE_UPDATE",
+  TYPING_START: "TYPING_START",
+  REACTION_ADD: "REACTION_ADD",
+  REACTION_REMOVE: "REACTION_REMOVE",
+  PRESENCE_UPDATE: "PRESENCE_UPDATE",
+  MESSAGE_PIN: "MESSAGE_PIN",
+  MESSAGE_UNPIN: "MESSAGE_UNPIN",
+  SPEAKING_UPDATE: "SPEAKING_UPDATE",
+  DM_MESSAGE_CREATE: "DM_MESSAGE_CREATE",
+  DM_CHANNEL_CREATE: "DM_CHANNEL_CREATE",
 } as const;
 
 export type DispatchEvent = (typeof DispatchEvent)[keyof typeof DispatchEvent];
@@ -66,6 +76,31 @@ export interface MemberLeaveData {
   serverId: string;
 }
 
+export interface TypingStartData {
+  channelId: string;
+  userId: string;
+  username: string;
+  displayName: string;
+}
+
+export interface ReactionData {
+  messageId: string;
+  channelId: string;
+  userId: string;
+  emoji: string;
+}
+
+export interface PresenceUpdateData {
+  userId: string;
+  status: "online" | "idle" | "dnd" | "offline";
+}
+
+export interface SpeakingUpdateData {
+  userId: string;
+  channelId: string;
+  speaking: boolean;
+}
+
 export interface WsVoiceStateUpdate {
   op: typeof WsOpcode.VOICE_STATE_UPDATE;
   d: {
@@ -95,7 +130,12 @@ export interface WsVoiceSignalResponse {
   };
 }
 
-export type WsClientMessage = WsIdentify | WsHeartbeat | WsVoiceStateUpdate | WsVoiceSignal;
+export interface WsTypingStart {
+  op: typeof WsOpcode.TYPING_START;
+  d: { channelId: string };
+}
+
+export type WsClientMessage = WsIdentify | WsHeartbeat | WsVoiceStateUpdate | WsVoiceSignal | WsTypingStart;
 
 export type WsServerMessage =
   | WsHeartbeatAck

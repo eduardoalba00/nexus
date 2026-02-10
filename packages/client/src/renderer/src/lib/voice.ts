@@ -8,6 +8,8 @@ type PendingRequest = {
   reject: (err: Error) => void;
 };
 
+type SpeakingCallback = (speaking: boolean) => void;
+
 export class VoiceManager {
   private device: Device | null = null;
   private sendTransport: msTypes.Transport | null = null;
@@ -18,8 +20,52 @@ export class VoiceManager {
   private pendingRequests = new Map<string, PendingRequest>();
   private requestCounter = 0;
 
+  // VAD
+  private audioContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private vadInterval: ReturnType<typeof setInterval> | null = null;
+  private isSpeaking = false;
+  private speakingCallback: SpeakingCallback | null = null;
+
+  // Device selection
+  private selectedInputDeviceId: string | null = null;
+  private selectedOutputDeviceId: string | null = null;
+
+  // Per-user volume
+  private userVolumes = new Map<string, number>();
+
   constructor() {
     wsManager.setVoiceSignalHandler(this.handleSignal.bind(this));
+  }
+
+  setSpeakingCallback(cb: SpeakingCallback | null) {
+    this.speakingCallback = cb;
+  }
+
+  setInputDevice(deviceId: string | null) {
+    this.selectedInputDeviceId = deviceId;
+  }
+
+  setOutputDevice(deviceId: string | null) {
+    this.selectedOutputDeviceId = deviceId;
+    // Apply to all existing consumers
+    for (const { audio } of this.consumers.values()) {
+      if (deviceId && "setSinkId" in audio) {
+        (audio as any).setSinkId(deviceId).catch(() => {});
+      }
+    }
+  }
+
+  setUserVolume(userId: string, volume: number) {
+    this.userVolumes.set(userId, Math.max(0, Math.min(2, volume)));
+    const entry = this.consumers.get(userId);
+    if (entry) {
+      entry.audio.volume = this.userVolumes.get(userId) ?? 1;
+    }
+  }
+
+  getUserVolume(userId: string): number {
+    return this.userVolumes.get(userId) ?? 1;
   }
 
   async join(channelId: string, serverId: string): Promise<void> {
@@ -84,14 +130,22 @@ export class VoiceManager {
       },
     );
 
-    // Get microphone and produce audio
-    this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Get microphone with selected device
+    const audioConstraints: MediaTrackConstraints = this.selectedInputDeviceId
+      ? { deviceId: { exact: this.selectedInputDeviceId } }
+      : true;
+    this.localStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
     const audioTrack = this.localStream.getAudioTracks()[0];
     this.producer = audioTrack;
     await this.sendTransport.produce({ track: audioTrack });
+
+    // Start VAD
+    this.startVAD(this.localStream);
   }
 
   leave(): void {
+    this.stopVAD();
+
     // Close all consumers
     for (const { consumer, audio } of this.consumers.values()) {
       consumer.close();
@@ -144,6 +198,57 @@ export class VoiceManager {
     }
   }
 
+  // --- VAD (Voice Activity Detection) ---
+  private startVAD(stream: MediaStream) {
+    try {
+      this.audioContext = new AudioContext();
+      const source = this.audioContext.createMediaStreamSource(stream);
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 512;
+      this.analyser.smoothingTimeConstant = 0.4;
+      source.connect(this.analyser);
+
+      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      const THRESHOLD = 20; // Sensitivity threshold
+
+      this.vadInterval = setInterval(() => {
+        if (!this.analyser) return;
+        this.analyser.getByteFrequencyData(dataArray);
+        const avg = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
+        const speaking = avg > THRESHOLD;
+
+        if (speaking !== this.isSpeaking) {
+          this.isSpeaking = speaking;
+          this.speakingCallback?.(speaking);
+        }
+      }, 50);
+    } catch {
+      // VAD not available, ignore
+    }
+  }
+
+  private stopVAD() {
+    if (this.vadInterval) {
+      clearInterval(this.vadInterval);
+      this.vadInterval = null;
+    }
+    if (this.audioContext) {
+      this.audioContext.close().catch(() => {});
+      this.audioContext = null;
+    }
+    this.analyser = null;
+    this.isSpeaking = false;
+  }
+
+  // --- Static device enumeration ---
+  static async getAudioDevices(): Promise<{ inputs: MediaDeviceInfo[]; outputs: MediaDeviceInfo[] }> {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return {
+      inputs: devices.filter((d) => d.kind === "audioinput"),
+      outputs: devices.filter((d) => d.kind === "audiooutput"),
+    };
+  }
+
   private async consumeProducer(producerId: string, producerUserId: string): Promise<void> {
     if (!this.device || !this.recvTransport) return;
 
@@ -165,6 +270,16 @@ export class VoiceManager {
     // Play audio
     const audio = new Audio();
     audio.srcObject = new MediaStream([consumer.track]);
+
+    // Apply per-user volume
+    const vol = this.userVolumes.get(producerUserId) ?? 1;
+    audio.volume = vol;
+
+    // Apply output device
+    if (this.selectedOutputDeviceId && "setSinkId" in audio) {
+      (audio as any).setSinkId(this.selectedOutputDeviceId).catch(() => {});
+    }
+
     audio.play().catch(() => {});
 
     this.consumers.set(producerUserId, { consumer, audio });

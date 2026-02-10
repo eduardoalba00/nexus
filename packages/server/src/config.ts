@@ -11,6 +11,8 @@ export interface Config {
   rtcMinPort: number;
   rtcMaxPort: number;
   rtcAnnouncedIp: string | undefined;
+  uploadDir: string;
+  maxFileSizeMb: number;
 }
 
 export function loadConfig(): Config {
@@ -25,5 +27,7 @@ export function loadConfig(): Config {
     rtcMinPort: parseInt(process.env.RTC_MIN_PORT || "10000", 10),
     rtcMaxPort: parseInt(process.env.RTC_MAX_PORT || "10100", 10),
     rtcAnnouncedIp: process.env.RTC_ANNOUNCED_IP || undefined,
+    uploadDir: process.env.UPLOAD_DIR || "./uploads",
+    maxFileSizeMb: parseInt(process.env.MAX_FILE_SIZE_MB || "25", 10),
   };
 }

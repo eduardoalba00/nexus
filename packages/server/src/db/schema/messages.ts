@@ -11,7 +11,10 @@ export const messages = sqliteTable("messages", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  replyToId: text("reply_to_id"),
   editedAt: integer("edited_at", { mode: "timestamp" }),
+  pinnedAt: integer("pinned_at", { mode: "timestamp" }),
+  pinnedBy: text("pinned_by"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useMessageStore } from "@/stores/messages";
 import type { Message } from "@nexus/shared";
 import { MessageItem } from "@/components/messages/message-item";
+import { TypingIndicator } from "@/components/messages/typing-indicator";
 import { Loader2, Hash } from "lucide-react";
 
 const EMPTY_MESSAGES: Message[] = [];
@@ -86,6 +87,7 @@ export function MessageList({ channelId, channelName }: MessageListProps) {
         const isCompact =
           prev &&
           prev.author.id === message.author.id &&
+          !message.replyTo &&
           new Date(message.createdAt).getTime() -
             new Date(prev.createdAt).getTime() <
             5 * 60 * 1000;
@@ -98,6 +100,7 @@ export function MessageList({ channelId, channelName }: MessageListProps) {
           />
         );
       })}
+      <TypingIndicator channelId={channelId} />
       <div ref={bottomRef} />
     </div>
   );

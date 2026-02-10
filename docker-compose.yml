@@ -1,0 +1,25 @@
+services:
+  nexus-server:
+    build: .
+    ports:
+      - "8080:8080"
+      - "10000-10100:10000-10100/udp"
+    volumes:
+      - nexus-data:/data
+      - nexus-uploads:/app/uploads
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/data/nexus.db
+      - UPLOAD_DIR=/app/uploads
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-}
+      - RTC_MIN_PORT=10000
+      - RTC_MAX_PORT=10100
+      - RTC_ANNOUNCED_IP=${RTC_ANNOUNCED_IP:-127.0.0.1}
+      - MAX_FILE_SIZE_MB=25
+    restart: unless-stopped
+
+volumes:
+  nexus-data:
+  nexus-uploads:

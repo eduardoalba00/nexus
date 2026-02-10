@@ -21,6 +21,11 @@ export const SERVER_ROUTES = {
   CHANNELS_DELETE: "/api/servers/:serverId/channels/:channelId",
   INVITES_CREATE: "/api/servers/:serverId/invites",
   INVITES_LIST: "/api/servers/:serverId/invites",
+  INVITES_DELETE: "/api/servers/:serverId/invites/:inviteId",
+  KICK_MEMBER: "/api/servers/:serverId/members/:userId",
+  BANS_LIST: "/api/servers/:serverId/bans",
+  BAN_CREATE: "/api/servers/:serverId/bans/:userId",
+  BAN_DELETE: "/api/servers/:serverId/bans/:userId",
 } as const;
 
 export const INVITE_ROUTES = {
@@ -32,6 +37,40 @@ export const MESSAGE_ROUTES = {
   CREATE: "/api/channels/:channelId/messages",
   UPDATE: "/api/channels/:channelId/messages/:messageId",
   DELETE: "/api/channels/:channelId/messages/:messageId",
+  REACTION_PUT: "/api/channels/:channelId/messages/:messageId/reactions/:emoji",
+  REACTION_DELETE: "/api/channels/:channelId/messages/:messageId/reactions/:emoji",
+  PIN: "/api/channels/:channelId/messages/:messageId/pin",
+  UNPIN: "/api/channels/:channelId/messages/:messageId/pin",
+  PINS_LIST: "/api/channels/:channelId/pins",
+} as const;
+
+export const UPLOAD_ROUTES = {
+  UPLOAD: "/api/upload",
+} as const;
+
+export const SEARCH_ROUTES = {
+  SEARCH: "/api/servers/:serverId/search",
+} as const;
+
+export const ROLE_ROUTES = {
+  LIST: "/api/servers/:serverId/roles",
+  CREATE: "/api/servers/:serverId/roles",
+  UPDATE: "/api/servers/:serverId/roles/:roleId",
+  DELETE: "/api/servers/:serverId/roles/:roleId",
+  ASSIGN: "/api/servers/:serverId/members/:userId/roles/:roleId",
+  REMOVE: "/api/servers/:serverId/members/:userId/roles/:roleId",
+} as const;
+
+export const DM_ROUTES = {
+  LIST: "/api/dms",
+  CREATE: "/api/dms",
+  GET: "/api/dms/:channelId",
+  MESSAGES_LIST: "/api/dms/:channelId/messages",
+  MESSAGES_CREATE: "/api/dms/:channelId/messages",
+} as const;
+
+export const READ_STATE_ROUTES = {
+  ACK: "/api/channels/:channelId/ack",
 } as const;
 
 export function buildRoute(

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Plus, ArrowLeftRight } from "lucide-react";
+import { Plus, ArrowLeftRight, MessageCircle } from "lucide-react";
 import { useServerStore } from "@/stores/servers";
 import { useChannelStore } from "@/stores/channels";
 import { useWorkspaceStore } from "@/stores/workspace";
+import { useDmStore } from "@/stores/dms";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CreateServerDialog } from "@/components/servers/create-server-dialog";
@@ -18,21 +19,59 @@ export function ServerSidebar() {
   const setActiveChannel = useChannelStore((s) => s.setActiveChannel);
 
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
+  const setActiveDm = useDmStore((s) => s.setActiveDm);
 
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
 
+  const isDmMode = !activeServerId;
+
   const handleServerClick = async (serverId: string) => {
     if (serverId === activeServerId) return;
+    setActiveDm(null);
     setActiveServer(serverId);
     setActiveChannel(null);
     clearChannels();
     await fetchChannels(serverId);
   };
 
+  const handleDmsClick = () => {
+    setActiveServer(null);
+    setActiveChannel(null);
+    clearChannels();
+  };
+
   return (
     <>
       <div className="flex flex-col items-center w-[72px] bg-sidebar py-3 gap-2 overflow-y-auto">
+        {/* DM button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="group relative flex items-center justify-center w-full">
+              <div
+                className={cn(
+                  "absolute left-0 bg-sidebar-primary rounded-r-full w-[4px] transition-all",
+                  isDmMode ? "h-[36px]" : "h-[8px] group-hover:h-[20px]",
+                  !isDmMode && "opacity-0 group-hover:opacity-100",
+                )}
+              />
+              <button
+                onClick={handleDmsClick}
+                className={cn(
+                  "relative h-[48px] w-[48px] rounded-[24px] bg-card flex items-center justify-center text-foreground transition-all",
+                  "hover:rounded-[16px] hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
+                  isDmMode && "rounded-[16px] bg-sidebar-primary text-sidebar-primary-foreground",
+                )}
+              >
+                <MessageCircle className="h-5 w-5" />
+              </button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">Direct Messages</TooltipContent>
+        </Tooltip>
+
+        <Separator className="w-8 my-1" />
+
         {servers.map((server) => {
           const isActive = activeServerId === server.id;
           return (

@@ -2,12 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { eq, and, asc, isNull } from "drizzle-orm";
 import {
   SERVER_ROUTES,
+  READ_STATE_ROUTES,
   createCategorySchema,
   createChannelSchema,
   updateChannelSchema,
 } from "@nexus/shared";
 import type { AppDatabase } from "../db/index.js";
 import { categories, channels } from "../db/schema/channels.js";
+import { readStates } from "../db/schema/read-states.js";
 import type { AuthService } from "../services/auth.js";
 import type { ServerService } from "../services/server.js";
 import { createAuthMiddleware } from "../middleware/auth.js";
@@ -289,6 +291,40 @@ export function channelRoutes(
       });
 
       return reply.status(204).send();
+    });
+
+    // POST /api/channels/:channelId/ack — mark channel as read
+    app.post(fastifyRoute(READ_STATE_ROUTES.ACK), { preHandler: requireAuth }, async (request, reply) => {
+      const { channelId } = request.params as { channelId: string };
+      const body = request.body as { messageId: string };
+
+      if (!body.messageId) {
+        return reply.status(400).send({ error: "messageId is required" });
+      }
+
+      const existing = await db
+        .select()
+        .from(readStates)
+        .where(and(eq(readStates.userId, request.user.sub), eq(readStates.channelId, channelId)))
+        .get();
+
+      if (existing) {
+        await db
+          .update(readStates)
+          .set({ lastReadMessageId: body.messageId, mentionCount: 0 })
+          .where(eq(readStates.id, existing.id))
+          .run();
+      } else {
+        await db.insert(readStates).values({
+          id: crypto.randomUUID(),
+          userId: request.user.sub,
+          channelId,
+          lastReadMessageId: body.messageId,
+          mentionCount: 0,
+        }).run();
+      }
+
+      return reply.status(200).send({ ok: true });
     });
   };
 }

@@ -4,6 +4,10 @@ export interface VoiceState {
   serverId: string;
   muted: boolean;
   deafened: boolean;
+  /** Included in server→client broadcasts for display purposes */
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string | null;
 }
 
 export type VoiceSignalAction =

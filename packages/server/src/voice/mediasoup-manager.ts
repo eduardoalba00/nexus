@@ -9,6 +9,16 @@ const MEDIA_CODECS: msTypes.RouterRtpCodecCapability[] = [
     clockRate: 48000,
     channels: 2,
   },
+  {
+    kind: "video",
+    mimeType: "video/VP8",
+    clockRate: 90000,
+  },
+  {
+    kind: "video",
+    mimeType: "video/VP9",
+    clockRate: 90000,
+  },
 ];
 
 export class MediasoupManager {

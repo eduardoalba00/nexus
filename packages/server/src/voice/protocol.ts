@@ -1,6 +1,9 @@
 import type { WebSocket } from "ws";
+import { eq } from "drizzle-orm";
 import { WsOpcode, DispatchEvent } from "@nexus/shared";
 import type { VoiceSignalAction } from "@nexus/shared";
+import type { AppDatabase } from "../db/index.js";
+import { users } from "../db/schema/users.js";
 import type { ConnectionManager } from "../ws/connection.js";
 import type { MediasoupManager } from "./mediasoup-manager.js";
 import type { VoiceStateManager, VoiceParticipant } from "./state.js";
@@ -31,42 +34,45 @@ export function handleVoiceStateUpdate(
   mediasoup: MediasoupManager,
   voiceState: VoiceStateManager,
   connectionManager: ConnectionManager,
+  db: AppDatabase,
 ): void {
   const { channelId, serverId } = msg.d ?? {};
+
+  // Handle leave first — serverId not needed since state manager tracks it
+  if (!channelId) {
+    handleLeave(userId, mediasoup, voiceState, connectionManager, db);
+    return;
+  }
+
   if (!serverId) return;
 
-  if (channelId) {
-    // Join voice channel
-    const { previousChannelId } = voiceState.join(userId, channelId, serverId);
+  // Join voice channel
+  const { previousChannelId } = voiceState.join(userId, channelId, serverId);
 
-    // Broadcast leave from previous channel if applicable
-    if (previousChannelId && previousChannelId !== channelId) {
-      broadcastVoiceState(connectionManager, serverId, userId, previousChannelId, true);
+  // Broadcast leave from previous channel if applicable
+  if (previousChannelId && previousChannelId !== channelId) {
+    broadcastVoiceState(connectionManager, db, serverId, userId, previousChannelId, true);
 
-      // Clean up empty router
-      if (voiceState.isChannelEmpty(previousChannelId)) {
-        mediasoup.closeRouter(previousChannelId);
-      }
+    // Clean up empty router
+    if (voiceState.isChannelEmpty(previousChannelId)) {
+      mediasoup.closeRouter(previousChannelId);
     }
-
-    // Get or create router, then send RTP capabilities back
-    mediasoup.getOrCreateRouter(channelId).then((router) => {
-      send(socket, {
-        op: WsOpcode.VOICE_SIGNAL,
-        d: {
-          requestId: "__join__",
-          action: "routerRtpCapabilities",
-          data: router.rtpCapabilities,
-        },
-      });
-    });
-
-    // Broadcast join to server members
-    broadcastVoiceState(connectionManager, serverId, userId, channelId, false);
-  } else {
-    // Leave voice channel
-    handleLeave(userId, mediasoup, voiceState, connectionManager);
   }
+
+  // Get or create router, then send RTP capabilities back
+  mediasoup.getOrCreateRouter(channelId).then((router) => {
+    send(socket, {
+      op: WsOpcode.VOICE_SIGNAL,
+      d: {
+        requestId: "__join__",
+        action: "routerRtpCapabilities",
+        data: router.rtpCapabilities,
+      },
+    });
+  });
+
+  // Broadcast join to server members
+  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, false);
 }
 
 export function handleLeave(
@@ -74,6 +80,7 @@ export function handleLeave(
   mediasoup: MediasoupManager,
   voiceState: VoiceStateManager,
   connectionManager: ConnectionManager,
+  db: AppDatabase,
 ): void {
   const result = voiceState.leave(userId);
   if (!result) return;
@@ -81,7 +88,7 @@ export function handleLeave(
   const { channelId, serverId } = result;
 
   // Broadcast leave to server members
-  broadcastVoiceState(connectionManager, serverId, userId, channelId, true);
+  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, true);
 
   // Close router if channel is now empty
   if (voiceState.isChannelEmpty(channelId)) {
@@ -242,13 +249,17 @@ export async function handleVoiceSignal(
   }
 }
 
-function broadcastVoiceState(
+async function broadcastVoiceState(
   connectionManager: ConnectionManager,
+  db: AppDatabase,
   serverId: string,
   userId: string,
   channelId: string,
   left: boolean,
-): void {
+): Promise<void> {
+  // Look up user info to include in the broadcast
+  const user = await db.select().from(users).where(eq(users.id, userId)).get();
+
   connectionManager.broadcastToServer(serverId, {
     op: WsOpcode.DISPATCH,
     t: DispatchEvent.VOICE_STATE_UPDATE,
@@ -258,6 +269,9 @@ function broadcastVoiceState(
       serverId,
       muted: false,
       deafened: false,
+      username: user?.username ?? "",
+      displayName: user?.displayName ?? "",
+      avatarUrl: user?.avatarUrl ?? null,
     },
   });
 }

@@ -7,6 +7,7 @@ export function VoicePanel() {
   const isConnecting = useVoiceStore((s) => s.isConnecting);
   const isMuted = useVoiceStore((s) => s.isMuted);
   const isDeafened = useVoiceStore((s) => s.isDeafened);
+  const isSpeaking = useVoiceStore((s) => s.isSpeaking);
   const leaveChannel = useVoiceStore((s) => s.leaveChannel);
   const toggleMute = useVoiceStore((s) => s.toggleMute);
   const toggleDeafen = useVoiceStore((s) => s.toggleDeafen);
@@ -20,6 +21,7 @@ export function VoicePanel() {
           className={cn(
             "w-2 h-2 rounded-full",
             isConnecting ? "bg-yellow-500 animate-pulse" : "bg-green-500",
+            isSpeaking && !isMuted && "ring-2 ring-green-500 ring-offset-1 ring-offset-card",
           )}
         />
         <span className="text-xs font-medium text-green-500">

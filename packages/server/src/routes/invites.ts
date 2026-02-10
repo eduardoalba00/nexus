@@ -9,6 +9,7 @@ import {
 import type { AppDatabase } from "../db/index.js";
 import { servers, serverMembers } from "../db/schema/servers.js";
 import { invites } from "../db/schema/invites.js";
+import { bans } from "../db/schema/bans.js";
 import { channels } from "../db/schema/channels.js";
 import { users } from "../db/schema/users.js";
 import type { AuthService } from "../services/auth.js";
@@ -117,6 +118,23 @@ export function inviteRoutes(
       );
     });
 
+    // DELETE /api/servers/:serverId/invites/:inviteId — revoke invite (owner)
+    app.delete(fastifyRoute(SERVER_ROUTES.INVITES_DELETE), { preHandler: requireAuth }, async (request, reply) => {
+      const { serverId, inviteId } = request.params as { serverId: string; inviteId: string };
+
+      const isOwner = await serverService.isOwner(serverId, request.user.sub);
+      if (!isOwner) {
+        return reply.status(403).send({ error: "Only the server owner can revoke invites" });
+      }
+
+      await db
+        .delete(invites)
+        .where(and(eq(invites.id, inviteId), eq(invites.serverId, serverId)))
+        .run();
+
+      return reply.status(204).send();
+    });
+
     // POST /api/invites/join — join server via invite code
     app.post(fastifyRoute(INVITE_ROUTES.JOIN), { preHandler: requireAuth }, async (request, reply) => {
       const parsed = joinServerSchema.safeParse(request.body);
@@ -142,6 +160,16 @@ export function inviteRoutes(
       // Check max uses
       if (invite.maxUses && invite.uses >= invite.maxUses) {
         return reply.status(410).send({ error: "This invite has reached its maximum uses" });
+      }
+
+      // Check if banned
+      const ban = await db
+        .select()
+        .from(bans)
+        .where(and(eq(bans.serverId, invite.serverId), eq(bans.userId, request.user.sub)))
+        .get();
+      if (ban) {
+        return reply.status(403).send({ error: "You are banned from this server" });
       }
 
       // Check if already a member

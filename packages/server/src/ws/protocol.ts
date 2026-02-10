@@ -1,9 +1,11 @@
 import type { WebSocket } from "ws";
-import { eq } from "drizzle-orm";
-import { WsOpcode } from "@nexus/shared";
+import { eq, and, inArray } from "drizzle-orm";
+import { WsOpcode, DispatchEvent } from "@nexus/shared";
 import type { AuthService } from "../services/auth.js";
 import type { AppDatabase } from "../db/index.js";
 import { serverMembers } from "../db/schema/servers.js";
+import { channels } from "../db/schema/channels.js";
+import { users } from "../db/schema/users.js";
 import type { ConnectionManager } from "./connection.js";
 import type { MediasoupManager } from "../voice/mediasoup-manager.js";
 import type { VoiceStateManager } from "../voice/state.js";
@@ -66,6 +68,21 @@ export function handleConnection(
           conn.alive = false;
         }, HEARTBEAT_TIMEOUT);
 
+        // Set user online and broadcast presence
+        await db
+          .update(users)
+          .set({ status: "online" })
+          .where(eq(users.id, userId))
+          .run();
+
+        for (const serverId of serverIds) {
+          connectionManager.broadcastToServer(serverId, {
+            op: 0,
+            t: "PRESENCE_UPDATE",
+            d: { userId, status: "online" },
+          });
+        }
+
         // Send READY
         socket.send(
           JSON.stringify({
@@ -73,6 +90,37 @@ export function handleConnection(
             d: { heartbeatInterval: HEARTBEAT_INTERVAL },
           }),
         );
+
+        // Send current voice states for all servers the user is in
+        const voiceStates = voiceStateManager.getStatesForServers(serverIds);
+        if (voiceStates.length > 0) {
+          // Look up user info for all voice participants
+          const voiceUserIds = [...new Set(voiceStates.map((s) => s.userId))];
+          const voiceUsers = voiceUserIds.length > 0
+            ? await db.select().from(users).where(inArray(users.id, voiceUserIds)).all()
+            : [];
+          const userMap = new Map(voiceUsers.map((u) => [u.id, u]));
+
+          for (const vs of voiceStates) {
+            const u = userMap.get(vs.userId);
+            socket.send(
+              JSON.stringify({
+                op: WsOpcode.DISPATCH,
+                t: DispatchEvent.VOICE_STATE_UPDATE,
+                d: {
+                  userId: vs.userId,
+                  channelId: vs.channelId,
+                  serverId: vs.serverId,
+                  muted: vs.muted,
+                  deafened: vs.deafened,
+                  username: u?.username ?? "",
+                  displayName: u?.displayName ?? "",
+                  avatarUrl: u?.avatarUrl ?? null,
+                },
+              }),
+            );
+          }
+        }
       } catch {
         socket.close(4003, "Authentication failed");
       }
@@ -93,7 +141,7 @@ export function handleConnection(
     }
 
     if (msg.op === WsOpcode.VOICE_STATE_UPDATE && identified && userId) {
-      handleVoiceStateUpdate(socket, userId, msg, mediasoupManager, voiceStateManager, connectionManager);
+      handleVoiceStateUpdate(socket, userId, msg, mediasoupManager, voiceStateManager, connectionManager, db);
       return;
     }
 
@@ -101,13 +149,75 @@ export function handleConnection(
       handleVoiceSignal(socket, userId, msg, mediasoupManager, voiceStateManager, connectionManager);
       return;
     }
+
+    if (msg.op === WsOpcode.TYPING_START && identified && userId) {
+      const channelId = msg.d?.channelId;
+      if (!channelId) return;
+
+      // Find the channel's server and verify membership
+      const channel = await db
+        .select()
+        .from(channels)
+        .where(eq(channels.id, channelId))
+        .get();
+      if (!channel) return;
+
+      const member = await db
+        .select()
+        .from(serverMembers)
+        .where(
+          and(
+            eq(serverMembers.serverId, channel.serverId),
+            eq(serverMembers.userId, userId),
+          ),
+        )
+        .get();
+      if (!member) return;
+
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .get();
+      if (!user) return;
+
+      connectionManager.broadcastToServer(channel.serverId, {
+        op: 0,
+        t: "TYPING_START",
+        d: {
+          channelId,
+          userId,
+          username: user.username,
+          displayName: user.displayName,
+        },
+      });
+      return;
+    }
   });
 
-  socket.on("close", () => {
+  socket.on("close", async () => {
     clearTimeout(identifyTimeout);
     if (userId) {
+      // Set user offline and broadcast presence
+      await db
+        .update(users)
+        .set({ status: "offline" })
+        .where(eq(users.id, userId))
+        .run();
+
+      const conn = connectionManager.get(userId);
+      if (conn) {
+        for (const serverId of conn.subscribedServers) {
+          connectionManager.broadcastToServer(serverId, {
+            op: 0,
+            t: "PRESENCE_UPDATE",
+            d: { userId, status: "offline" },
+          });
+        }
+      }
+
       // Auto-leave voice channel on disconnect
-      handleLeave(userId, mediasoupManager, voiceStateManager, connectionManager);
+      handleLeave(userId, mediasoupManager, voiceStateManager, connectionManager, db);
       connectionManager.remove(userId);
     }
   });

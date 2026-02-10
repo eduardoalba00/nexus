@@ -18,6 +18,8 @@ import { CreateCategoryDialog } from "@/components/channels/create-category-dial
 import { InviteDialog } from "@/components/channels/invite-dialog";
 import { VoicePanel } from "@/components/voice/voice-panel";
 import { VoiceUser } from "@/components/voice/voice-user";
+import { UserSettingsModal } from "@/components/settings/user-settings-modal";
+import { ServerSettingsModal } from "@/components/settings/server-settings-modal";
 import { cn } from "@/lib/utils";
 import type { Channel, CategoryWithChannels } from "@nexus/shared";
 
@@ -39,6 +41,8 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [showUserSettings, setShowUserSettings] = useState(false);
+  const [showServerSettings, setShowServerSettings] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const server = servers.find((s) => s.id === serverId);
@@ -68,24 +72,29 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
   };
 
   const voiceChannelId = useVoiceStore((s) => s.currentChannelId);
-  const voiceParticipants = useVoiceStore((s) => s.participants);
+  const channelUsers = useVoiceStore((s) => s.channelUsers);
   const joinVoice = useVoiceStore((s) => s.joinChannel);
+
+  const unreadChannels = useChannelStore((s) => s.unreadChannels);
+  const markRead = useChannelStore((s) => s.markRead);
 
   const ChannelItem = ({ channel }: { channel: Channel }) => {
     const isVoice = channel.type === "voice";
     const isInThisVoice = voiceChannelId === channel.id;
+    const isUnread = unreadChannels.has(channel.id);
 
     const handleClick = () => {
       if (isVoice) {
         joinVoice(channel.id, serverId);
       } else {
         setActiveChannel(channel.id);
+        if (isUnread) markRead(channel.id, "");
       }
     };
 
-    // Get participants for this voice channel
-    const participants = isVoice && isInThisVoice
-      ? Array.from(voiceParticipants.values())
+    // Get participants for this voice channel (visible to everyone)
+    const participants = isVoice
+      ? Object.values(channelUsers[channel.id] ?? {})
       : [];
 
     return (
@@ -96,6 +105,7 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
             "flex items-center gap-x-2 w-full px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
             !isVoice && activeChannelId === channel.id && "bg-muted text-foreground",
             isInThisVoice && "text-green-500",
+            isUnread && "text-foreground font-semibold",
           )}
         >
           {isVoice ? (
@@ -104,6 +114,9 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
             <Hash className="h-4 w-4 shrink-0 opacity-50" />
           )}
           <span className="truncate">{channel.name}</span>
+          {isUnread && (
+            <span className="ml-auto w-2 h-2 rounded-full bg-primary shrink-0" />
+          )}
         </button>
         {participants.length > 0 && (
           <div className="ml-4 mt-0.5 space-y-0.5">
@@ -160,6 +173,10 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
             </DropdownMenuItem>
             {isOwner && (
               <>
+                <DropdownMenuItem onClick={() => setShowServerSettings(true)}>
+                  <Settings className="h-4 w-4" />
+                  Server Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowCreateChannel(true)}>
                   <Plus className="h-4 w-4" />
                   Create Channel
@@ -214,12 +231,23 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
         {/* User panel */}
         <div className="flex items-center gap-2 px-3 py-2 border-t border-border bg-card">
           <div className="w-8 h-8 rounded-full bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center text-xs font-semibold">
-            {user?.displayName?.charAt(0).toUpperCase() || "?"}
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} className="w-8 h-8 rounded-full object-cover" alt="" />
+            ) : (
+              user?.displayName?.charAt(0).toUpperCase() || "?"
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user?.displayName}</p>
             <p className="text-xs text-muted-foreground truncate">{user?.username}</p>
           </div>
+          <button
+            onClick={() => setShowUserSettings(true)}
+            className="p-1 text-muted-foreground hover:text-foreground rounded transition-colors"
+            title="User Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -238,6 +266,15 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
         onOpenChange={setShowInvite}
         serverId={serverId}
       />
+      {showUserSettings && (
+        <UserSettingsModal onClose={() => setShowUserSettings(false)} />
+      )}
+      {showServerSettings && server && (
+        <ServerSettingsModal
+          server={server}
+          onClose={() => setShowServerSettings(false)}
+        />
+      )}
     </>
   );
 }

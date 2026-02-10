@@ -3,6 +3,7 @@ import { useServerStore } from "@/stores/servers";
 import { ChannelHeader } from "@/components/channels/channel-header";
 import { MessageList } from "@/components/messages/message-list";
 import { MessageInput } from "@/components/messages/message-input";
+import { MembersSidebar } from "@/components/members/members-sidebar";
 import { Hash } from "lucide-react";
 
 export function MainContent() {
@@ -50,10 +51,13 @@ export function MainContent() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      <ChannelHeader channel={activeChannel} />
-      <MessageList channelId={activeChannel.id} channelName={activeChannel.name} />
-      <MessageInput channelId={activeChannel.id} channelName={activeChannel.name} />
+    <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <ChannelHeader channel={activeChannel} />
+        <MessageList channelId={activeChannel.id} channelName={activeChannel.name} />
+        <MessageInput channelId={activeChannel.id} channelName={activeChannel.name} />
+      </div>
+      <MembersSidebar serverId={activeServerId} />
     </div>
   );
 }

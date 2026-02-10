@@ -5,6 +5,8 @@ export const sendMessageSchema = z.object({
     .string()
     .min(1, "Message content is required")
     .max(4000, "Message must be at most 4000 characters"),
+  replyToId: z.string().optional(),
+  attachmentIds: z.array(z.string()).optional(),
 });
 
 export const editMessageSchema = z.object({

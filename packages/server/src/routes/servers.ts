@@ -5,6 +5,9 @@ import type { AppDatabase } from "../db/index.js";
 import { users } from "../db/schema/users.js";
 import { servers, serverMembers } from "../db/schema/servers.js";
 import { channels } from "../db/schema/channels.js";
+import { bans } from "../db/schema/bans.js";
+import { roles } from "../db/schema/roles.js";
+import { Permission } from "@nexus/shared";
 import type { AuthService } from "../services/auth.js";
 import type { ServerService } from "../services/server.js";
 import { createAuthMiddleware } from "../middleware/auth.js";
@@ -66,6 +69,17 @@ export function serverRoutes(
         name: "general",
         type: "text",
         position: 0,
+      }).run();
+
+      // Auto-create @everyone default role
+      await db.insert(roles).values({
+        id: crypto.randomUUID(),
+        serverId,
+        name: "@everyone",
+        position: 0,
+        permissions: Permission.SEND_MESSAGES,
+        isDefault: true,
+        createdAt: now,
       }).run();
 
       const server = (await db.select().from(servers).where(eq(servers.id, serverId)).get())!;
@@ -234,6 +248,137 @@ export function serverRoutes(
       });
 
       return reply.status(204).send();
+    });
+
+    // DELETE /api/servers/:serverId/members/:userId — kick member (owner only)
+    app.delete(fastifyRoute(SERVER_ROUTES.KICK_MEMBER), { preHandler: requireAuth }, async (request, reply) => {
+      const { serverId, userId } = request.params as { serverId: string; userId: string };
+
+      const isOwner = await serverService.isOwner(serverId, request.user.sub);
+      if (!isOwner) {
+        return reply.status(403).send({ error: "Only the server owner can kick members" });
+      }
+
+      if (userId === request.user.sub) {
+        return reply.status(400).send({ error: "Cannot kick yourself" });
+      }
+
+      const member = await db
+        .select()
+        .from(serverMembers)
+        .where(
+          and(
+            eq(serverMembers.serverId, serverId),
+            eq(serverMembers.userId, userId),
+          ),
+        )
+        .get();
+
+      if (!member) {
+        return reply.status(404).send({ error: "Member not found" });
+      }
+
+      await db
+        .delete(serverMembers)
+        .where(eq(serverMembers.id, member.id))
+        .run();
+
+      pubsub.publish(`server:${serverId}`, {
+        op: 0,
+        t: "MEMBER_LEAVE",
+        d: { userId, serverId },
+      });
+
+      return reply.status(204).send();
+    });
+
+    // PUT /api/servers/:serverId/bans/:userId — ban member (owner only)
+    app.put(fastifyRoute(SERVER_ROUTES.BAN_CREATE), { preHandler: requireAuth }, async (request, reply) => {
+      const { serverId, userId } = request.params as { serverId: string; userId: string };
+
+      const isOwner = await serverService.isOwner(serverId, request.user.sub);
+      if (!isOwner) {
+        return reply.status(403).send({ error: "Only the server owner can ban members" });
+      }
+
+      if (userId === request.user.sub) {
+        return reply.status(400).send({ error: "Cannot ban yourself" });
+      }
+
+      const body = request.body as { reason?: string } | undefined;
+
+      // Remove from server
+      await db
+        .delete(serverMembers)
+        .where(
+          and(
+            eq(serverMembers.serverId, serverId),
+            eq(serverMembers.userId, userId),
+          ),
+        )
+        .run();
+
+      // Create ban record
+      await db.insert(bans).values({
+        id: crypto.randomUUID(),
+        serverId,
+        userId,
+        reason: body?.reason || null,
+        bannedBy: request.user.sub,
+        createdAt: new Date(),
+      }).run();
+
+      pubsub.publish(`server:${serverId}`, {
+        op: 0,
+        t: "MEMBER_LEAVE",
+        d: { userId, serverId },
+      });
+
+      return reply.status(204).send();
+    });
+
+    // DELETE /api/servers/:serverId/bans/:userId — unban (owner only)
+    app.delete(fastifyRoute(SERVER_ROUTES.BAN_DELETE), { preHandler: requireAuth }, async (request, reply) => {
+      const { serverId, userId } = request.params as { serverId: string; userId: string };
+
+      const isOwner = await serverService.isOwner(serverId, request.user.sub);
+      if (!isOwner) {
+        return reply.status(403).send({ error: "Only the server owner can unban members" });
+      }
+
+      await db
+        .delete(bans)
+        .where(and(eq(bans.serverId, serverId), eq(bans.userId, userId)))
+        .run();
+
+      return reply.status(204).send();
+    });
+
+    // GET /api/servers/:serverId/bans — list bans (owner only)
+    app.get(fastifyRoute(SERVER_ROUTES.BANS_LIST), { preHandler: requireAuth }, async (request, reply) => {
+      const { serverId } = request.params as { serverId: string };
+
+      const isOwner = await serverService.isOwner(serverId, request.user.sub);
+      if (!isOwner) {
+        return reply.status(403).send({ error: "Only the server owner can view bans" });
+      }
+
+      const allBans = await db
+        .select()
+        .from(bans)
+        .innerJoin(users, eq(bans.userId, users.id))
+        .where(eq(bans.serverId, serverId))
+        .all();
+
+      return reply.send(
+        allBans.map((row) => ({
+          id: row.bans.id,
+          userId: row.bans.userId,
+          user: userToPublic(row.users),
+          reason: row.bans.reason,
+          createdAt: row.bans.createdAt.toISOString(),
+        })),
+      );
     });
   };
 }
