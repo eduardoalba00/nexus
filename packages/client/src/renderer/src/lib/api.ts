@@ -16,6 +16,7 @@ export class ApiClient {
 
   async fetch<T>(path: string, options: RequestInit = {}): Promise<T> {
     const headers: Record<string, string> = {
+      "ngrok-skip-browser-warning": "true",
       ...((options.headers as Record<string, string>) || {}),
     };
 
