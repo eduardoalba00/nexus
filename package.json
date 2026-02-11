@@ -1,6 +1,7 @@
 {
   "name": "nexus",
   "private": true,
+  "packageManager": "pnpm@9.11.0",
   "scripts": {
     "dev:server": "pnpm --filter @nexus/server dev",
     "dev:client": "pnpm --filter @nexus/client dev",
