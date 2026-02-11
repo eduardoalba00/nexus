@@ -1,6 +1,6 @@
 import { MicOff, VolumeX, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { VoiceChannelUser } from "@nexus/shared";
+import type { VoiceChannelUser } from "@migo/shared";
 
 interface VoiceUserProps {
   user: VoiceChannelUser;

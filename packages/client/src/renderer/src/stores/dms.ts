@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { DmChannel, Message } from "@nexus/shared";
-import { DM_ROUTES, buildRoute } from "@nexus/shared";
+import type { DmChannel, Message } from "@migo/shared";
+import { DM_ROUTES, buildRoute } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface DmState {

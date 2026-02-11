@@ -1,7 +1,7 @@
 import type { WebSocket } from "ws";
 import { eq } from "drizzle-orm";
-import { WsOpcode, DispatchEvent } from "@nexus/shared";
-import type { VoiceSignalAction } from "@nexus/shared";
+import { WsOpcode, DispatchEvent } from "@migo/shared";
+import type { VoiceSignalAction } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { users } from "../db/schema/users.js";
 import type { ConnectionManager } from "../ws/connection.js";

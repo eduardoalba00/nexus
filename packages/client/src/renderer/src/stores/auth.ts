@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import type { User, AuthResponse, TokenPair } from "@nexus/shared";
-import { AUTH_ROUTES } from "@nexus/shared";
+import type { User, AuthResponse, TokenPair } from "@migo/shared";
+import { AUTH_ROUTES } from "@migo/shared";
 import { api, ApiError } from "@/lib/api";
 
 interface AuthState {
@@ -22,7 +22,7 @@ interface AuthState {
 
 function getActiveWorkspaceId(): string | null {
   try {
-    const raw = localStorage.getItem("nexus-workspaces");
+    const raw = localStorage.getItem("migo-workspaces");
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed?.state?.activeWorkspaceId ?? null;
@@ -36,11 +36,11 @@ function persistAuth(tokens: TokenPair | null, user: User | null) {
   if (!workspaceId) return;
   if (tokens && user) {
     localStorage.setItem(
-      `nexus-auth-${workspaceId}`,
+      `migo-auth-${workspaceId}`,
       JSON.stringify({ tokens, user }),
     );
   } else {
-    localStorage.removeItem(`nexus-auth-${workspaceId}`);
+    localStorage.removeItem(`migo-auth-${workspaceId}`);
   }
 }
 
@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         displayName,
       });
       api.setAccessToken(data.tokens.accessToken);
-      (window as any).__nexusUserId = data.user.id;
+      (window as any).__migoUserId = data.user.id;
       set({ user: data.user, tokens: data.tokens, isLoading: false });
       persistAuth(data.tokens, data.user);
     } catch (e) {
@@ -77,7 +77,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         password,
       });
       api.setAccessToken(data.tokens.accessToken);
-      (window as any).__nexusUserId = data.user.id;
+      (window as any).__migoUserId = data.user.id;
       set({ user: data.user, tokens: data.tokens, isLoading: false });
       persistAuth(data.tokens, data.user);
     } catch (e) {
@@ -132,7 +132,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   hydrateFromWorkspace: (workspaceId: string) => {
     try {
-      const raw = localStorage.getItem(`nexus-auth-${workspaceId}`);
+      const raw = localStorage.getItem(`migo-auth-${workspaceId}`);
       if (!raw) {
         set({ user: null, tokens: null });
         api.setAccessToken(null);
@@ -141,7 +141,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const { tokens, user } = JSON.parse(raw);
       if (tokens?.accessToken) {
         api.setAccessToken(tokens.accessToken);
-        if (user?.id) (window as any).__nexusUserId = user.id;
+        if (user?.id) (window as any).__migoUserId = user.id;
         set({ user, tokens });
       }
     } catch {
@@ -156,10 +156,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 }));
 
-// One-time migration: if old "nexus-auth" key exists and no workspaces yet, create a default workspace
+// One-time migration: if old "migo-auth" key exists and no workspaces yet, create a default workspace
 (function migrateOldAuth() {
-  const oldAuth = localStorage.getItem("nexus-auth");
-  const workspaces = localStorage.getItem("nexus-workspaces");
+  const oldAuth = localStorage.getItem("migo-auth");
+  const workspaces = localStorage.getItem("migo-workspaces");
 
   if (oldAuth && !workspaces) {
     try {
@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         const workspace = { id, name: "Local Server", url: "http://localhost:8080" };
 
         localStorage.setItem(
-          "nexus-workspaces",
+          "migo-workspaces",
           JSON.stringify({
             state: {
               workspaces: [workspace],
@@ -180,10 +180,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           }),
         );
         localStorage.setItem(
-          `nexus-auth-${id}`,
+          `migo-auth-${id}`,
           JSON.stringify({ tokens, user }),
         );
-        localStorage.removeItem("nexus-auth");
+        localStorage.removeItem("migo-auth");
       }
     } catch {
       // Migration failed, ignore

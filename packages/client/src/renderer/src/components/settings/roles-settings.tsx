@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Shield } from "lucide-react";
-import { ROLE_ROUTES, buildRoute, Permission } from "@nexus/shared";
-import type { Role } from "@nexus/shared";
+import { ROLE_ROUTES, buildRoute, Permission } from "@migo/shared";
+import type { Role } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface RolesSettingsProps {

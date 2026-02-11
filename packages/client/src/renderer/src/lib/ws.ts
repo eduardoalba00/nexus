@@ -1,5 +1,5 @@
-import { WsOpcode } from "@nexus/shared";
-import type { WsServerMessage, WsDispatch } from "@nexus/shared";
+import { WsOpcode } from "@migo/shared";
+import type { WsServerMessage, WsDispatch } from "@migo/shared";
 
 export type DispatchHandler = (event: WsDispatch) => void;
 export type VoiceSignalHandler = (msg: any) => void;

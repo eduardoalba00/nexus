@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { eq } from "drizzle-orm";
-import { registerSchema, loginSchema, refreshSchema, AUTH_ROUTES } from "@nexus/shared";
+import { registerSchema, loginSchema, refreshSchema, AUTH_ROUTES } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { users } from "../db/schema/users.js";
 import type { AuthService } from "../services/auth.js";

@@ -45,7 +45,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
 
       removeWorkspace: (id) => {
         // Clean up auth for this workspace
-        localStorage.removeItem(`nexus-auth-${id}`);
+        localStorage.removeItem(`migo-auth-${id}`);
 
         const { activeWorkspaceId, workspaces } = get();
         const remaining = workspaces.filter((w) => w.id !== id);
@@ -97,7 +97,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       },
     }),
     {
-      name: "nexus-workspaces",
+      name: "migo-workspaces",
       partialize: (state) => ({
         workspaces: state.workspaces,
         activeWorkspaceId: state.activeWorkspaceId,

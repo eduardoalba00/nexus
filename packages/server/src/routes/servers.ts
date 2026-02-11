@@ -1,13 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and } from "drizzle-orm";
-import { SERVER_ROUTES, createServerSchema, updateServerSchema } from "@nexus/shared";
+import { SERVER_ROUTES, createServerSchema, updateServerSchema } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { users } from "../db/schema/users.js";
 import { servers, serverMembers } from "../db/schema/servers.js";
 import { channels } from "../db/schema/channels.js";
 import { bans } from "../db/schema/bans.js";
 import { roles } from "../db/schema/roles.js";
-import { Permission } from "@nexus/shared";
+import { Permission } from "@migo/shared";
 import type { AuthService } from "../services/auth.js";
 import type { ServerService } from "../services/server.js";
 import { createAuthMiddleware } from "../middleware/auth.js";

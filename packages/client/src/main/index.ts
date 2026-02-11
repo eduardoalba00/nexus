@@ -4,8 +4,8 @@ import { is } from "@electron-toolkit/utils";
 import electronUpdater from "electron-updater";
 const { autoUpdater } = electronUpdater;
 
-if (process.env.NEXUS_INSTANCE) {
-  app.setPath("userData", app.getPath("userData") + "-" + process.env.NEXUS_INSTANCE);
+if (process.env.MIGO_INSTANCE) {
+  app.setPath("userData", app.getPath("userData") + "-" + process.env.MIGO_INSTANCE);
 }
 
 function createWindow(): BrowserWindow {

@@ -188,7 +188,7 @@ async function main() {
   const app = await buildApp(config, db);
 
   await app.listen({ port: config.port, host: config.host });
-  console.log(`Nexus server running on http://${config.host}:${config.port}`);
+  console.log(`Migo server running on http://${config.host}:${config.port}`);
 }
 
 main().catch((err) => {

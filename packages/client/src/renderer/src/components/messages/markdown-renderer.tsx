@@ -38,7 +38,7 @@ function parseInline(text: string): string {
   // Spoilers (||...||)
   result = result.replace(
     /\|\|(.+?)\|\|/g,
-    '<span class="nexus-spoiler bg-muted-foreground/80 text-transparent hover:bg-transparent hover:text-foreground rounded px-0.5 transition-colors cursor-pointer" onclick="this.classList.toggle(\'revealed\')">$1</span>',
+    '<span class="migo-spoiler bg-muted-foreground/80 text-transparent hover:bg-transparent hover:text-foreground rounded px-0.5 transition-colors cursor-pointer" onclick="this.classList.toggle(\'revealed\')">$1</span>',
   );
 
   // Block quotes (> ...)

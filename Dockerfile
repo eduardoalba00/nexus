@@ -14,8 +14,8 @@ COPY packages/server packages/server
 COPY tsconfig.base.json ./
 
 # Build shared and server
-RUN pnpm --filter @nexus/shared build 2>/dev/null || true
-RUN pnpm --filter @nexus/server build
+RUN pnpm --filter @migo/shared build 2>/dev/null || true
+RUN pnpm --filter @migo/server build
 
 # Production image
 FROM node:22-slim AS production
@@ -33,7 +33,7 @@ COPY --from=base /app/packages/server/dist packages/server/dist
 # Create directories
 RUN mkdir -p /data /app/uploads
 
-ENV DATABASE_PATH=/data/nexus.db
+ENV DATABASE_PATH=/data/migo.db
 ENV UPLOAD_DIR=/app/uploads
 ENV HOST=0.0.0.0
 ENV PORT=8080

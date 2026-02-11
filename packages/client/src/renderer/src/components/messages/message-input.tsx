@@ -4,8 +4,8 @@ import { useMessageStore } from "@/stores/messages";
 import { useServerStore } from "@/stores/servers";
 import { EmojiPicker } from "@/components/messages/emoji-picker";
 import { wsManager } from "@/lib/ws";
-import { WsOpcode, SERVER_ROUTES, buildRoute } from "@nexus/shared";
-import type { ServerMember } from "@nexus/shared";
+import { WsOpcode, SERVER_ROUTES, buildRoute } from "@migo/shared";
+import type { ServerMember } from "@migo/shared";
 import { api, resolveUploadUrl } from "@/lib/api";
 
 interface MessageInputProps {

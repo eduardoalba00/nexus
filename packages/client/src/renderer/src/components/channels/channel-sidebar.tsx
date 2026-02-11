@@ -22,7 +22,7 @@ import { UserSettingsModal } from "@/components/settings/user-settings-modal";
 import { ServerSettingsModal } from "@/components/settings/server-settings-modal";
 import { cn } from "@/lib/utils";
 import { resolveUploadUrl } from "@/lib/api";
-import type { Channel, CategoryWithChannels } from "@nexus/shared";
+import type { Channel, CategoryWithChannels } from "@migo/shared";
 
 interface ChannelSidebarProps {
   serverId: string;

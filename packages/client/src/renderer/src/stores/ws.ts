@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { DispatchEvent } from "@nexus/shared";
-import type { WsDispatch, Message, Channel, DmChannel, ServerMember, MessageDeleteData, MemberLeaveData, VoiceState, TypingStartData, ReactionData, PresenceUpdateData } from "@nexus/shared";
+import { DispatchEvent } from "@migo/shared";
+import type { WsDispatch, Message, Channel, DmChannel, ServerMember, MessageDeleteData, MemberLeaveData, VoiceState, TypingStartData, ReactionData, PresenceUpdateData } from "@migo/shared";
 import { wsManager } from "@/lib/ws";
 import { playMessageSound, playMentionSound } from "@/lib/sounds";
 import { useChannelStore } from "./channels";
@@ -29,7 +29,7 @@ export const useWsStore = create<WsState>()((set) => ({
         case DispatchEvent.MESSAGE_CREATE: {
           const msg = event.d as Message;
           useMessageStore.getState().handleMessageCreate(msg);
-          const myId = (window as any).__nexusUserId;
+          const myId = (window as any).__migoUserId;
           const isOwnMsg = msg.author.id === myId;
           // Mark channel as unread if it's not the active channel
           useChannelStore.getState().markUnread(msg.channelId);
@@ -98,7 +98,7 @@ export const useWsStore = create<WsState>()((set) => ({
         case DispatchEvent.DM_MESSAGE_CREATE: {
           const dmMsg = event.d as Message;
           useDmStore.getState().handleDmMessageCreate(dmMsg);
-          if (dmMsg.author.id !== (window as any).__nexusUserId) {
+          if (dmMsg.author.id !== (window as any).__migoUserId) {
             playMessageSound();
             if (!document.hasFocus()) {
               try {

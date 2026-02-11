@@ -5,7 +5,7 @@ import {
   INVITE_ROUTES,
   createInviteSchema,
   joinServerSchema,
-} from "@nexus/shared";
+} from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { servers, serverMembers } from "../db/schema/servers.js";
 import { invites } from "../db/schema/invites.js";

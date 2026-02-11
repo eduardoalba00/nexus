@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and, desc } from "drizzle-orm";
-import { DM_ROUTES } from "@nexus/shared";
+import { DM_ROUTES } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { dmChannels, dmMembers } from "../db/schema/dm-channels.js";
 import { users } from "../db/schema/users.js";

@@ -67,7 +67,7 @@ export function AddWorkspaceDialog({ open, onOpenChange }: AddWorkspaceDialogPro
         <DialogHeader className="pt-6 px-6">
           <DialogTitle className="text-xl text-center font-bold">Add a workspace</DialogTitle>
           <DialogDescription className="text-center">
-            Connect to a Nexus server by entering its name and URL.
+            Connect to a Migo server by entering its name and URL.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="px-6 space-y-4">

@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Message, ReactionData } from "@nexus/shared";
-import { MESSAGE_ROUTES, buildRoute } from "@nexus/shared";
+import type { Message, ReactionData } from "@migo/shared";
+import { MESSAGE_ROUTES, buildRoute } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface ReplyContext {
@@ -160,13 +160,13 @@ export const useMessageStore = create<MessageState>()((set, get) => ({
               reactions[idx] = {
                 ...reactions[idx],
                 count: reactions[idx].count + 1,
-                me: reactions[idx].me || data.userId === (window as any).__nexusUserId,
+                me: reactions[idx].me || data.userId === (window as any).__migoUserId,
               };
             } else {
               reactions.push({
                 emoji: data.emoji,
                 count: 1,
-                me: data.userId === (window as any).__nexusUserId,
+                me: data.userId === (window as any).__migoUserId,
               });
             }
             return { ...m, reactions };
@@ -190,7 +190,7 @@ export const useMessageStore = create<MessageState>()((set, get) => ({
                 return {
                   ...r,
                   count: r.count - 1,
-                  me: data.userId === (window as any).__nexusUserId ? false : r.me,
+                  me: data.userId === (window as any).__migoUserId ? false : r.me,
                 };
               })
               .filter((r) => r.count > 0);

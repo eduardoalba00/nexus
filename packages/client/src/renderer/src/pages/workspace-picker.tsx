@@ -18,11 +18,11 @@ export function WorkspacePicker() {
       <div className="flex flex-1 items-center justify-center bg-background">
         <Card className="w-[440px] shadow-xl overflow-hidden">
           <CardHeader className="text-center">
-            <CardTitle>Welcome to Nexus</CardTitle>
+            <CardTitle>Welcome to Migo</CardTitle>
             <CardDescription>
               {workspaces.length > 0
                 ? "Select a workspace or add a new one."
-                : "Add a workspace to connect to a Nexus server."}
+                : "Add a workspace to connect to a Migo server."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

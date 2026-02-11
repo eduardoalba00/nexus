@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Server } from "@nexus/shared";
-import { SERVER_ROUTES, INVITE_ROUTES, buildRoute } from "@nexus/shared";
+import type { Server } from "@migo/shared";
+import { SERVER_ROUTES, INVITE_ROUTES, buildRoute } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface ServerState {

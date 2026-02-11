@@ -15,7 +15,7 @@ export default defineConfig({
       alias: {
         "@": resolve("src/renderer/src"),
       },
-      conditions: ["@nexus/source"],
+      conditions: ["@migo/source"],
     },
     plugins: [react(), tailwindcss()],
   },

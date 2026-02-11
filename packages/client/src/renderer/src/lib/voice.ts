@@ -1,6 +1,6 @@
 import { Device, types as msTypes } from "mediasoup-client";
-import { WsOpcode } from "@nexus/shared";
-import type { VoiceSignalAction } from "@nexus/shared";
+import { WsOpcode } from "@migo/shared";
+import type { VoiceSignalAction } from "@migo/shared";
 import { wsManager } from "./ws";
 
 type PendingRequest = {

@@ -1,6 +1,6 @@
 import { X, MessageCircle } from "lucide-react";
 import { resolveUploadUrl } from "@/lib/api";
-import type { ServerMember } from "@nexus/shared";
+import type { ServerMember } from "@migo/shared";
 import { useAuthStore } from "@/stores/auth";
 import { useDmStore } from "@/stores/dms";
 import { useServerStore } from "@/stores/servers";

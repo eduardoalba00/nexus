@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { resolveUploadUrl } from "@/lib/api";
-import type { ServerMember, UserStatus } from "@nexus/shared";
+import type { ServerMember, UserStatus } from "@migo/shared";
 import { UserProfilePopup } from "./user-profile-popup";
 
 interface MemberItemProps {

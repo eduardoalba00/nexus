@@ -5,6 +5,6 @@ export default defineConfig({
   schema: "./src/db/schema/*",
   out: "./drizzle",
   dbCredentials: {
-    url: `file:${process.env.DATABASE_PATH || "./nexus.db"}`,
+    url: `file:${process.env.DATABASE_PATH || "./migo.db"}`,
   },
 });

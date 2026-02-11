@@ -9,8 +9,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { SERVER_ROUTES, buildRoute } from "@nexus/shared";
-import type { Invite } from "@nexus/shared";
+import { SERVER_ROUTES, buildRoute } from "@migo/shared";
+import type { Invite } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface InviteDialogProps {

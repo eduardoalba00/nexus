@@ -1,5 +1,5 @@
-appId: com.nexus.app
-productName: Nexus
+appId: com.migo.app
+productName: Migo
 directories:
   buildResources: resources
   output: dist
@@ -10,7 +10,7 @@ files:
   - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 win:
-  executableName: Nexus
+  executableName: Migo
   target:
     - nsis
 nsis:
@@ -21,5 +21,5 @@ nsis:
 publish:
   provider: github
   owner: eduardoalba00
-  repo: nexus
+  repo: migo
   releaseType: release

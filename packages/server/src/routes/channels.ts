@@ -6,7 +6,7 @@ import {
   createCategorySchema,
   createChannelSchema,
   updateChannelSchema,
-} from "@nexus/shared";
+} from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { categories, channels } from "../db/schema/channels.js";
 import { readStates } from "../db/schema/read-states.js";

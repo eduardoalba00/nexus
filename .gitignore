@@ -8,3 +8,4 @@ out
 .env
 .env.local
 *uploads/
+.claude\settings.local.json

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and } from "drizzle-orm";
-import { ROLE_ROUTES, createRoleSchema, updateRoleSchema, Permission } from "@nexus/shared";
+import { ROLE_ROUTES, createRoleSchema, updateRoleSchema, Permission } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { roles, memberRoles } from "../db/schema/roles.js";
 import { servers, serverMembers } from "../db/schema/servers.js";

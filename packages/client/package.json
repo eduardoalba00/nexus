@@ -1,5 +1,5 @@
 {
-  "name": "@nexus/client",
+  "name": "@migo/client",
   "version": "0.2.3",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "rebuild": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@nexus/shared": "workspace:*",
+    "@migo/shared": "workspace:*",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",

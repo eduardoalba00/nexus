@@ -11,7 +11,7 @@ pnpm install
 # Dev servers (run in separate terminals)
 pnpm dev:server          # Fastify backend with tsx watch (port 8080)
 pnpm dev:client          # Electron + Vite React app
-pnpm dev:client2         # Second client instance (NEXUS_INSTANCE=2)
+pnpm dev:client2         # Second client instance (MIGO_INSTANCE=2)
 
 # Production builds
 pnpm build:server        # tsc → packages/server/dist/
@@ -28,13 +28,13 @@ No test framework is configured yet.
 
 **pnpm monorepo** with three packages:
 
-- **`@nexus/server`** — Fastify 5 REST API + WebSocket server. SQLite via Drizzle ORM + libsql. Voice via mediasoup SFU. Auth via argon2 + JWT (jose).
-- **`@nexus/client`** — Electron 40 desktop app. React 19 renderer built with electron-vite. State management with Zustand. Styling with Tailwind CSS 4 (OKLCH color tokens). UI primitives from Radix UI.
-- **`@nexus/shared`** — Zod schemas, TypeScript types, and API route constants shared between client and server.
+- **`@migo/server`** — Fastify 5 REST API + WebSocket server. SQLite via Drizzle ORM + libsql. Voice via mediasoup SFU. Auth via argon2 + JWT (jose).
+- **`@migo/client`** — Electron 40 desktop app. React 19 renderer built with electron-vite. State management with Zustand. Styling with Tailwind CSS 4 (OKLCH color tokens). UI primitives from Radix UI.
+- **`@migo/shared`** — Zod schemas, TypeScript types, and API route constants shared between client and server.
 
 ### Shared package resolution
 
-The shared package uses a custom export condition `@nexus/source` so dev tools (tsx, electron-vite) resolve TypeScript sources directly instead of compiled JS. This is set in `tsconfig.base.json` via `customConditions` and in the server dev script via `--conditions @nexus/source`.
+The shared package uses a custom export condition `@migo/source` so dev tools (tsx, electron-vite) resolve TypeScript sources directly instead of compiled JS. This is set in `tsconfig.base.json` via `customConditions` and in the server dev script via `--conditions @migo/source`.
 
 ### Server structure (`packages/server/src/`)
 
@@ -47,7 +47,7 @@ The shared package uses a custom export condition `@nexus/source` so dev tools (
 | `ws/` | WebSocket protocol: connection registry, opcode handler, EventEmitter-based pubsub |
 | `voice/` | Mediasoup SFU manager, voice state tracking, WebRTC signaling |
 
-Config is env-based (`config.ts`): `PORT`, `HOST`, `DATABASE_PATH`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `RTC_MIN_PORT`, `RTC_MAX_PORT`, `RTC_ANNOUNCED_IP`. Defaults work for local dev (auto-generated JWT secrets, `./nexus.db`).
+Config is env-based (`config.ts`): `PORT`, `HOST`, `DATABASE_PATH`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `RTC_MIN_PORT`, `RTC_MAX_PORT`, `RTC_ANNOUNCED_IP`. Defaults work for local dev (auto-generated JWT secrets, `./migo.db`).
 
 ### Client structure (`packages/client/src/renderer/src/`)
 
@@ -62,17 +62,17 @@ Path alias: `@/*` maps to `src/renderer/src/*` in the client.
 
 ### WebSocket protocol
 
-Custom binary-style JSON protocol with opcodes: DISPATCH (0), IDENTIFY (1), HEARTBEAT (2), HEARTBEAT_ACK (3), READY (4), VOICE_STATE_UPDATE (5), VOICE_SIGNAL (6). Dispatch events include MESSAGE_CREATE/UPDATE/DELETE, CHANNEL_CREATE/UPDATE/DELETE, MEMBER_JOIN/LEAVE, VOICE_STATE_UPDATE. Types defined in `@nexus/shared`.
+Custom binary-style JSON protocol with opcodes: DISPATCH (0), IDENTIFY (1), HEARTBEAT (2), HEARTBEAT_ACK (3), READY (4), VOICE_STATE_UPDATE (5), VOICE_SIGNAL (6). Dispatch events include MESSAGE_CREATE/UPDATE/DELETE, CHANNEL_CREATE/UPDATE/DELETE, MEMBER_JOIN/LEAVE, VOICE_STATE_UPDATE. Types defined in `@migo/shared`.
 
 ### Auth flow
 
-JWT access (15m) + refresh (7d) tokens. Client stores tokens per workspace in localStorage (`nexus-auth-{workspaceId}`). Multi-workspace support allows connecting to different server instances.
+JWT access (15m) + refresh (7d) tokens. Client stores tokens per workspace in localStorage (`migo-auth-{workspaceId}`). Multi-workspace support allows connecting to different server instances.
 
 ## Key Conventions
 
 - All database IDs are UUIDs; timestamps are integer milliseconds
 - Zod validates on both client (forms) and server (route handlers)
 - Server routes use `:paramName` path templates with a `fastifyRoute()` helper from `lib/route-utils.ts`
-- API route paths are defined as constants in `@nexus/shared` and shared across packages
+- API route paths are defined as constants in `@migo/shared` and shared across packages
 - Theme uses OKLCH color space with CSS custom properties, light/dark via next-themes
 - Electron uses frameless window with custom titlebar; IPC bridge exposes window controls (minimize/maximize/close)

@@ -1,11 +1,11 @@
 {
-  "name": "@nexus/shared",
+  "name": "@migo/shared",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "exports": {
     ".": {
-      "@nexus/source": "./src/index.ts",
+      "@migo/source": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }

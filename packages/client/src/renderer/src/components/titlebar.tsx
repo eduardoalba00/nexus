@@ -18,7 +18,7 @@ export function Titlebar() {
         className="flex-1 h-full flex items-center px-3 text-xs font-medium text-muted-foreground"
         style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
       >
-        Nexus
+        Migo
       </div>
       <div className="flex" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
         <button

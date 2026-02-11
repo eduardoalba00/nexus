@@ -1,7 +1,7 @@
 import * as argon2 from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import type { Config } from "../config.js";
-import type { TokenPair } from "@nexus/shared";
+import type { TokenPair } from "@migo/shared";
 
 export interface JwtPayload {
   sub: string;

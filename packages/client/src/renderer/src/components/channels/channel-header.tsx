@@ -3,7 +3,7 @@ import { Hash, Volume2, Users, Search } from "lucide-react";
 import { useWsStore } from "@/stores/ws";
 import { useMemberStore } from "@/stores/members";
 import { cn } from "@/lib/utils";
-import type { Channel } from "@nexus/shared";
+import type { Channel } from "@migo/shared";
 import { SearchDialog } from "@/components/search/search-dialog";
 
 interface ChannelHeaderProps {

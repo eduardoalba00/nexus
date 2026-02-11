@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMemberStore } from "@/stores/members";
 import { MemberItem } from "./member-item";
-import type { ServerMember, UserStatus } from "@nexus/shared";
+import type { ServerMember, UserStatus } from "@migo/shared";
 
 interface MembersSidebarProps {
   serverId: string;

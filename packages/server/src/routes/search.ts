@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { eq, and, like } from "drizzle-orm";
-import { SEARCH_ROUTES } from "@nexus/shared";
+import { SEARCH_ROUTES } from "@migo/shared";
 import type { AppDatabase } from "../db/index.js";
 import { messages } from "../db/schema/messages.js";
 import { channels } from "../db/schema/channels.js";

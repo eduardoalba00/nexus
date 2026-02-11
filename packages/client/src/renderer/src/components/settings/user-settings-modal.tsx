@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, User, Lock, Palette, Volume2 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 import { api, resolveUploadUrl } from "@/lib/api";
-import { AUTH_ROUTES, UPLOAD_ROUTES } from "@nexus/shared";
+import { AUTH_ROUTES, UPLOAD_ROUTES } from "@migo/shared";
 
 interface UserSettingsModalProps {
   onClose: () => void;

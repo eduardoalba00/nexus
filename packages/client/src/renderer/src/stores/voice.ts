@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { VoiceState, VoiceChannelUser } from "@nexus/shared";
+import type { VoiceState, VoiceChannelUser } from "@migo/shared";
 import { voiceManager } from "@/lib/voice";
 import { playJoinSound, playLeaveSound, playMuteSound, playUnmuteSound } from "@/lib/sounds";
 import { useMemberStore } from "./members";
@@ -208,9 +208,9 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
     }));
     // Persist to localStorage
     try {
-      const stored = JSON.parse(localStorage.getItem("nexus-user-volumes") || "{}");
+      const stored = JSON.parse(localStorage.getItem("migo-user-volumes") || "{}");
       stored[userId] = volume;
-      localStorage.setItem("nexus-user-volumes", JSON.stringify(stored));
+      localStorage.setItem("migo-user-volumes", JSON.stringify(stored));
     } catch {}
   },
 

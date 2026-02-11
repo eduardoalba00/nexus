@@ -38,7 +38,7 @@ export default function App() {
   }, [activeWorkspaceId]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" storageKey="nexus-theme">
+    <ThemeProvider attribute="class" defaultTheme="dark" storageKey="migo-theme">
       <div className="flex flex-col h-screen">
         <Titlebar />
         <UpdateNotification />

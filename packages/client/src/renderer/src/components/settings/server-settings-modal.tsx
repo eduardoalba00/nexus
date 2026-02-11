@@ -3,8 +3,8 @@ import { X, Settings, Users, Link, Trash2, Shield, Ban } from "lucide-react";
 import { useServerStore } from "@/stores/servers";
 import { useMemberStore } from "@/stores/members";
 import { api, resolveUploadUrl } from "@/lib/api";
-import { SERVER_ROUTES, buildRoute } from "@nexus/shared";
-import type { Server, ServerMember, Invite, User } from "@nexus/shared";
+import { SERVER_ROUTES, buildRoute } from "@migo/shared";
+import type { Server, ServerMember, Invite, User } from "@migo/shared";
 import { RolesSettings } from "./roles-settings";
 
 interface ServerSettingsModalProps {

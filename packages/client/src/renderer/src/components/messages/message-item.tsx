@@ -7,7 +7,7 @@ import { MarkdownRenderer } from "@/components/messages/markdown-renderer";
 import { EmojiPicker } from "@/components/messages/emoji-picker";
 import { AttachmentRenderer } from "@/components/messages/attachment-renderer";
 import { resolveUploadUrl } from "@/lib/api";
-import type { Message } from "@nexus/shared";
+import type { Message } from "@migo/shared";
 
 interface MessageItemProps {
   message: Message;

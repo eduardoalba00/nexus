@@ -1,6 +1,6 @@
 import type { WebSocket } from "ws";
 import { eq, and, inArray } from "drizzle-orm";
-import { WsOpcode, DispatchEvent } from "@nexus/shared";
+import { WsOpcode, DispatchEvent } from "@migo/shared";
 import type { AuthService } from "../services/auth.js";
 import type { AppDatabase } from "../db/index.js";
 import { serverMembers } from "../db/schema/servers.js";

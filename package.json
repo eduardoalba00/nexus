@@ -1,15 +1,15 @@
 {
-  "name": "nexus",
+  "name": "migo",
   "private": true,
   "packageManager": "pnpm@9.11.0",
   "scripts": {
-    "dev:server": "pnpm --filter @nexus/server dev",
-    "dev:client": "pnpm --filter @nexus/client dev",
-    "build:server": "pnpm --filter @nexus/server build",
-    "build:client": "pnpm --filter @nexus/client build",
-    "dev:client2": "cross-env NEXUS_INSTANCE=2 pnpm --filter @nexus/client dev",
-    "db:generate": "pnpm --filter @nexus/server db:generate",
-    "db:migrate": "pnpm --filter @nexus/server db:migrate"
+    "dev:server": "pnpm --filter @migo/server dev",
+    "dev:client": "pnpm --filter @migo/client dev",
+    "build:server": "pnpm --filter @migo/server build",
+    "build:client": "pnpm --filter @migo/client build",
+    "dev:client2": "cross-env MIGO_INSTANCE=2 pnpm --filter @migo/client dev",
+    "db:generate": "pnpm --filter @migo/server db:generate",
+    "db:migrate": "pnpm --filter @migo/server db:migrate"
   },
   "dependencies": {
     "electron": "^40.2.1"

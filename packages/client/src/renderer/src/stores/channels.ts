@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { ServerChannelList, Channel, Category } from "@nexus/shared";
-import { SERVER_ROUTES, READ_STATE_ROUTES, buildRoute } from "@nexus/shared";
+import type { ServerChannelList, Channel, Category } from "@migo/shared";
+import { SERVER_ROUTES, READ_STATE_ROUTES, buildRoute } from "@migo/shared";
 import { api } from "@/lib/api";
 
 interface ChannelState {

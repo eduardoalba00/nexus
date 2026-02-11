@@ -1,5 +1,5 @@
 import { Download, FileText, Film, Music } from "lucide-react";
-import type { Attachment } from "@nexus/shared";
+import type { Attachment } from "@migo/shared";
 import { useWorkspaceStore } from "@/stores/workspace";
 
 interface AttachmentRendererProps {

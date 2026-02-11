@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
-import { SEARCH_ROUTES, buildRoute } from "@nexus/shared";
+import { SEARCH_ROUTES, buildRoute } from "@migo/shared";
 import { api } from "@/lib/api";
 import { useChannelStore } from "@/stores/channels";
 
