@@ -81,6 +81,15 @@ export class VoiceStateManager {
     return participant;
   }
 
+  setScreenSharing(userId: string, screenSharing: boolean): VoiceParticipant | null {
+    const channelId = this.userChannels.get(userId);
+    if (!channelId) return null;
+    const participant = this.channels.get(channelId)?.get(userId);
+    if (!participant) return null;
+    participant.screenSharing = screenSharing;
+    return participant;
+  }
+
   getChannelForUser(userId: string): string | null {
     return this.userChannels.get(userId) ?? null;
   }
@@ -91,9 +100,9 @@ export class VoiceStateManager {
   }
 
   /** Get all active voice states for users in the given server IDs */
-  getStatesForServers(serverIds: string[]): Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean }> {
+  getStatesForServers(serverIds: string[]): Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean; screenSharing: boolean }> {
     const serverSet = new Set(serverIds);
-    const result: Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean }> = [];
+    const result: Array<{ userId: string; channelId: string; serverId: string; muted: boolean; deafened: boolean; screenSharing: boolean }> = [];
     for (const [, channelUsers] of this.channels) {
       for (const [, participant] of channelUsers) {
         if (serverSet.has(participant.serverId)) {
@@ -103,6 +112,7 @@ export class VoiceStateManager {
             serverId: participant.serverId,
             muted: participant.muted,
             deafened: participant.deafened,
+            screenSharing: participant.screenSharing,
           });
         }
       }

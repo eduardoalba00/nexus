@@ -332,6 +332,10 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
     try {
       await livekitManager.setScreenShareEnabled(true, sourceId);
       set({ isScreenSharing: true });
+      wsManager.send({
+        op: WsOpcode.VOICE_SIGNAL,
+        d: { requestId: `ss_${Date.now()}`, action: "startScreenShare" },
+      });
     } catch (err) {
       console.error("Failed to start screen share:", err);
       set({ isScreenSharing: false });
@@ -341,6 +345,10 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
   stopScreenShare: () => {
     livekitManager.setScreenShareEnabled(false);
     set({ isScreenSharing: false });
+    wsManager.send({
+      op: WsOpcode.VOICE_SIGNAL,
+      d: { requestId: `ss_${Date.now()}`, action: "stopScreenShare" },
+    });
   },
 
   handleScreenShareStart: (data: { userId: string; channelId: string }) => {

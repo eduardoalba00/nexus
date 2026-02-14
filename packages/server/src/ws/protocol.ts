@@ -163,7 +163,7 @@ export function handleConnection(
     }
 
     if (msg.op === WsOpcode.VOICE_SIGNAL && identified && userId) {
-      handleVoiceSignal(socket, userId, msg, livekitService, voiceStateManager);
+      handleVoiceSignal(socket, userId, msg, livekitService, voiceStateManager, connectionManager, db);
       return;
     }
 

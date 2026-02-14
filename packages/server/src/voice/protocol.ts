@@ -87,9 +87,37 @@ export async function handleVoiceSignal(
   msg: any,
   livekit: LiveKitService,
   voiceState: VoiceStateManager,
+  connectionManager: ConnectionManager,
+  db: AppDatabase,
 ): Promise<void> {
   const { requestId, action, data } = msg.d ?? {};
   if (!requestId || !action) return;
+
+  if (action === "startScreenShare") {
+    const participant = voiceState.setScreenSharing(userId, true);
+    if (participant) {
+      connectionManager.broadcastToServer(participant.serverId, {
+        op: WsOpcode.DISPATCH,
+        t: DispatchEvent.SCREEN_SHARE_START,
+        d: { userId, channelId: participant.channelId, serverId: participant.serverId },
+      });
+      broadcastVoiceState(connectionManager, db, participant.serverId, userId, participant.channelId, false, voiceState);
+    }
+    return;
+  }
+
+  if (action === "stopScreenShare") {
+    const participant = voiceState.setScreenSharing(userId, false);
+    if (participant) {
+      connectionManager.broadcastToServer(participant.serverId, {
+        op: WsOpcode.DISPATCH,
+        t: DispatchEvent.SCREEN_SHARE_STOP,
+        d: { userId, channelId: participant.channelId, serverId: participant.serverId },
+      });
+      broadcastVoiceState(connectionManager, db, participant.serverId, userId, participant.channelId, false, voiceState);
+    }
+    return;
+  }
 
   if (action === "joinVoice") {
     const participant = voiceState.getParticipant(userId);
@@ -144,6 +172,7 @@ async function broadcastVoiceState(
       serverId,
       muted: participant?.muted ?? false,
       deafened: participant?.deafened ?? false,
+      screenSharing: participant?.screenSharing ?? false,
       username: user?.username ?? "",
       displayName: user?.displayName ?? "",
       avatarUrl: user?.avatarUrl ?? null,
