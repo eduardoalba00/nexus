@@ -1,3 +1,6 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { loadConfig } from "./config.js";
 import { createDatabase } from "./db/index.js";
 import { buildApp } from "./app.js";
@@ -5,6 +8,11 @@ import { buildApp } from "./app.js";
 async function main() {
   const config = loadConfig();
   const { db } = createDatabase(config.databaseUrl);
+
+  console.log("Running database migrations...");
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  await migrate(db, { migrationsFolder: path.join(__dirname, "../drizzle") });
+  console.log("Migrations applied successfully");
 
   const app = await buildApp(config, db);
 

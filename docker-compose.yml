@@ -1,25 +1,59 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  livekit:
+    image: livekit/livekit-server
+    restart: unless-stopped
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+    environment:
+      LIVEKIT_CONFIG: |
+        port: 7880
+        rtc:
+          tcp_port: 7881
+          port_range_start: 50000
+          port_range_end: 50100
+          use_external_ip: true
+        keys:
+          ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
+
   migo-server:
     build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      livekit:
+        condition: service_started
     ports:
       - "8080:8080"
-      - "10000-10100:10000-10100/udp"
     volumes:
-      - migo-data:/data
-      - migo-uploads:/app/uploads
+      - uploads:/data/uploads
     environment:
-      - PORT=8080
-      - HOST=0.0.0.0
-      - DATABASE_PATH=/data/migo.db
-      - UPLOAD_DIR=/app/uploads
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-}
-      - RTC_MIN_PORT=10000
-      - RTC_MAX_PORT=10100
-      - RTC_ANNOUNCED_IP=${RTC_ANNOUNCED_IP:-127.0.0.1}
-      - MAX_FILE_SIZE_MB=25
-    restart: unless-stopped
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_PUBLIC_URL: ws://localhost:7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      UPLOAD_DIR: /data/uploads
 
 volumes:
-  migo-data:
-  migo-uploads:
+  pgdata:
+  uploads:

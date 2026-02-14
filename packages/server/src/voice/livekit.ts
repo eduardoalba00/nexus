@@ -31,7 +31,7 @@ export class LiveKitService {
   }
 
   get url(): string {
-    return this.config.livekitUrl;
+    return this.config.livekitPublicUrl;
   }
 
   async listParticipants(roomName: string) {

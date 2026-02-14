@@ -1,7 +1,9 @@
 node_modules
-.git
-*.db
-uploads
 dist
-packages/client
+.git
 .env
+*.md
+packages/client/src
+packages/client/resources
+packages/client/electron.vite.config.*
+.vscode

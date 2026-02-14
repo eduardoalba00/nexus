@@ -24,6 +24,23 @@ pnpm db:migrate          # Apply migrations (tsx src/db/migrate.ts)
 
 No test framework is configured yet.
 
+## Self-Hosted Docker Deployment
+
+```bash
+# 1. Copy and fill in secrets
+cp .env.example .env
+# Edit .env — generate secrets with: node -e "console.log(crypto.randomBytes(32).toString('hex'))"
+
+# 2. Start all services
+docker compose up -d --build
+
+# 3. Stop
+docker compose down          # keeps data
+docker compose down -v       # removes volumes (fresh start)
+```
+
+Services: PostgreSQL 17, LiveKit (voice), migo-server (port 8080). Migrations run automatically on startup. Data persists in Docker volumes (`pgdata`, `uploads`).
+
 ## Architecture
 
 **pnpm monorepo** with three packages:
