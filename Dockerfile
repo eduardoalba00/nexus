@@ -30,6 +30,7 @@ RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=base /app/packages/shared/dist packages/shared/dist
 COPY --from=base /app/packages/server/dist packages/server/dist
+COPY --from=base /app/packages/server/drizzle packages/server/drizzle
 
 ENV NODE_ENV=production
 EXPOSE 8080
