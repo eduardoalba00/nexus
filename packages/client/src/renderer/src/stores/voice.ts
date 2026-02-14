@@ -19,8 +19,8 @@ interface VoiceStoreState {
 
   // Screen sharing
   isScreenSharing: boolean;
-  screenShareUserId: string | null;
-  screenShareTrack: MediaStreamTrack | null;
+  screenShareTracks: Record<string, MediaStreamTrack>;
+  focusedScreenShareUserId: string | null;
   showScreenSharePicker: boolean;
 
   joinChannel: (channelId: string, serverId: string) => Promise<void>;
@@ -35,6 +35,8 @@ interface VoiceStoreState {
   stopScreenShare: () => void;
   handleScreenShareStart: (data: { userId: string; channelId: string }) => void;
   handleScreenShareStop: (data: { userId: string }) => void;
+  focusScreenShare: (userId: string) => void;
+  unfocusScreenShare: () => void;
 }
 
 // Helper to signal the server and wait for a response
@@ -82,8 +84,8 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
   speakingUsers: new Set<string>(),
   userVolumes: {},
   isScreenSharing: false,
-  screenShareUserId: null,
-  screenShareTrack: null,
+  screenShareTracks: {},
+  focusedScreenShareUserId: null,
   showScreenSharePicker: false,
 
   joinChannel: async (channelId, serverId) => {
@@ -104,9 +106,19 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
 
     livekitManager.setScreenShareCallback((userId, track) => {
       if (track) {
-        set({ screenShareUserId: userId, screenShareTrack: track });
+        set((s) => ({
+          screenShareTracks: { ...s.screenShareTracks, [userId]: track },
+        }));
       } else {
-        set({ screenShareUserId: null, screenShareTrack: null });
+        set((s) => {
+          const screenShareTracks = { ...s.screenShareTracks };
+          delete screenShareTracks[userId];
+          return {
+            screenShareTracks,
+            focusedScreenShareUserId:
+              s.focusedScreenShareUserId === userId ? null : s.focusedScreenShareUserId,
+          };
+        });
       }
     });
 
@@ -156,8 +168,8 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
       isConnecting: false,
       speakingUsers: new Set(),
       isScreenSharing: false,
-      screenShareUserId: null,
-      screenShareTrack: null,
+      screenShareTracks: {},
+      focusedScreenShareUserId: null,
       showScreenSharePicker: false,
     });
   },
@@ -296,7 +308,7 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
   },
 
   handleScreenShareStart: (data: { userId: string; channelId: string }) => {
-    const { currentChannelId, channelUsers } = get();
+    const { channelUsers } = get();
     // Update the user's screenSharing status
     if (data.channelId && channelUsers[data.channelId]?.[data.userId]) {
       set((s) => ({
@@ -310,23 +322,15 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
             },
           },
         },
-        // If we're in the same channel, set the screen share user
-        ...(currentChannelId === data.channelId ? { screenShareUserId: data.userId } : {}),
       }));
-    } else if (currentChannelId === data.channelId) {
-      set({ screenShareUserId: data.userId });
     }
   },
 
   handleScreenShareStop: (data: { userId: string }) => {
     set((s) => {
-      const updates: Partial<VoiceStoreState> = {};
-
-      // Clear screen share user if it matches
-      if (s.screenShareUserId === data.userId) {
-        updates.screenShareUserId = null;
-        updates.screenShareTrack = null;
-      }
+      // Remove track from map
+      const screenShareTracks = { ...s.screenShareTracks };
+      delete screenShareTracks[data.userId];
 
       // Update channelUsers to clear screenSharing flag
       const channelUsers = { ...s.channelUsers };
@@ -341,9 +345,21 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
           };
         }
       }
-      updates.channelUsers = channelUsers;
 
-      return updates;
+      return {
+        screenShareTracks,
+        channelUsers,
+        focusedScreenShareUserId:
+          s.focusedScreenShareUserId === data.userId ? null : s.focusedScreenShareUserId,
+      };
     });
+  },
+
+  focusScreenShare: (userId: string) => {
+    set({ focusedScreenShareUserId: userId });
+  },
+
+  unfocusScreenShare: () => {
+    set({ focusedScreenShareUserId: null });
   },
 }));

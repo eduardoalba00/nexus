@@ -86,7 +86,10 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
 
     const handleClick = () => {
       if (isVoice) {
-        joinVoice(channel.id, serverId);
+        if (!isInThisVoice) {
+          joinVoice(channel.id, serverId);
+        }
+        setActiveChannel(channel.id);
       } else {
         setActiveChannel(channel.id);
         if (isUnread) markRead(channel.id, "");
@@ -104,7 +107,7 @@ export function ChannelSidebar({ serverId }: ChannelSidebarProps) {
           onClick={handleClick}
           className={cn(
             "flex items-center gap-x-2 w-full px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-            !isVoice && activeChannelId === channel.id && "bg-muted text-foreground",
+            activeChannelId === channel.id && "bg-muted text-foreground",
             isInThisVoice && "text-green-500",
             isUnread && "text-foreground font-semibold",
           )}

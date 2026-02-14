@@ -119,9 +119,13 @@ export class LiveKitManager {
         source: Track.Source.ScreenShare,
         name: "screen",
       });
+      // Notify callback so the local user sees their own screen share
+      this.screenShareCallback?.(this.room.localParticipant.identity, track);
     } else if (enabled) {
       await this.room.localParticipant.setScreenShareEnabled(true);
     } else {
+      // Notify callback to remove local screen share before disabling
+      this.screenShareCallback?.(this.room.localParticipant.identity, null);
       await this.room.localParticipant.setScreenShareEnabled(false);
     }
   }

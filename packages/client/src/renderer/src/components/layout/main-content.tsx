@@ -6,14 +6,13 @@ import { MessageList } from "@/components/messages/message-list";
 import { MessageInput } from "@/components/messages/message-input";
 import { MembersSidebar } from "@/components/members/members-sidebar";
 import { ScreenShareViewer } from "@/components/voice/screen-share-viewer";
-import { Hash } from "lucide-react";
+import { Hash, Volume2 } from "lucide-react";
 
 export function MainContent() {
   const activeServerId = useServerStore((s) => s.activeServerId);
   const activeChannelId = useChannelStore((s) => s.activeChannelId);
   const channelList = useChannelStore((s) => s.channelList);
-  const screenShareTrack = useVoiceStore((s) => s.screenShareTrack);
-  const screenShareUserId = useVoiceStore((s) => s.screenShareUserId);
+  const screenShareTracks = useVoiceStore((s) => s.screenShareTracks);
   const currentVoiceChannelId = useVoiceStore((s) => s.currentChannelId);
   const channelUsers = useVoiceStore((s) => s.channelUsers);
 
@@ -56,26 +55,50 @@ export function MainContent() {
     );
   }
 
-  // Resolve screen sharer name
-  let sharerName = "";
-  if (screenShareUserId && currentVoiceChannelId) {
+  const isVoiceChannel = activeChannel.type === "voice";
+
+  const getUserName = (userId: string): string => {
+    if (!currentVoiceChannelId) return "Someone";
     const users = channelUsers[currentVoiceChannelId];
-    if (users?.[screenShareUserId]) {
-      sharerName = users[screenShareUserId].displayName || users[screenShareUserId].username;
+    if (users?.[userId]) {
+      return users[userId].displayName || users[userId].username;
     }
+    return "Someone";
+  };
+
+  // Voice channel view
+  if (isVoiceChannel) {
+    const hasScreenShares = Object.keys(screenShareTracks).length > 0;
+
+    return (
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <ChannelHeader channel={activeChannel} />
+          {hasScreenShares ? (
+            <ScreenShareViewer tracks={screenShareTracks} getUserName={getUserName} />
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="text-center text-muted-foreground space-y-3">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+                  <Volume2 className="h-8 w-8" />
+                </div>
+                <p className="text-lg font-bold text-foreground">{activeChannel.name}</p>
+                <p className="text-sm">No one is sharing their screen</p>
+              </div>
+            </div>
+          )}
+        </div>
+        <MembersSidebar serverId={activeServerId} />
+      </div>
+    );
   }
 
-  const showScreenShare = screenShareTrack && screenShareUserId;
-
+  // Text channel view
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-1 flex-col overflow-hidden">
         <ChannelHeader channel={activeChannel} />
-        {showScreenShare ? (
-          <ScreenShareViewer track={screenShareTrack} sharerName={sharerName || "Someone"} />
-        ) : (
-          <MessageList channelId={activeChannel.id} channelName={activeChannel.name} />
-        )}
+        <MessageList channelId={activeChannel.id} channelName={activeChannel.name} />
         <MessageInput channelId={activeChannel.id} channelName={activeChannel.name} />
       </div>
       <MembersSidebar serverId={activeServerId} />
