@@ -43,6 +43,12 @@ export function UpdateNotification() {
       setProgress(data);
     });
 
+    // Trigger a check from the renderer so we don't miss events
+    // that fired before the component mounted
+    window.updaterAPI.check().catch(() => {
+      setPhase((prev) => (prev === "checking" ? "none" : prev));
+    });
+
     return () => {
       cleanupStatus();
       cleanupProgress();

@@ -129,9 +129,8 @@ function setupAutoUpdater(mainWindow: BrowserWindow): void {
     return app.getVersion();
   });
 
-  // Check for updates immediately on launch, then every 5 minutes
-  autoUpdater.checkForUpdates().catch(() => {});
-
+  // Re-check for updates every 5 minutes during long sessions
+  // (initial check is triggered by the renderer after it mounts)
   setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {});
   }, 5 * 60 * 1000);
