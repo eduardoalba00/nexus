@@ -97,11 +97,13 @@ export class LiveKitManager {
   async setScreenShareEnabled(enabled: boolean, sourceId?: string): Promise<void> {
     if (!this.room) return;
 
-    if (enabled) {
-      const opts: any = {};
-      if (sourceId) {
-        opts.contentHint = "detail";
-        opts.video = {
+    if (enabled && sourceId) {
+      // Electron's desktopCapturer requires the legacy mandatory constraint format
+      // via getUserMedia — getDisplayMedia rejects it. Capture the stream ourselves
+      // and publish the track directly to LiveKit.
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
           mandatory: {
             chromeMediaSource: "desktop",
             chromeMediaSourceId: sourceId,
@@ -109,9 +111,16 @@ export class LiveKitManager {
             maxHeight: 1440,
             maxFrameRate: 60,
           },
-        };
-      }
-      await this.room.localParticipant.setScreenShareEnabled(true, opts);
+        } as any,
+      });
+      const track = stream.getVideoTracks()[0];
+      track.contentHint = "detail";
+      await this.room.localParticipant.publishTrack(track, {
+        source: Track.Source.ScreenShare,
+        name: "screen",
+      });
+    } else if (enabled) {
+      await this.room.localParticipant.setScreenShareEnabled(true);
     } else {
       await this.room.localParticipant.setScreenShareEnabled(false);
     }
