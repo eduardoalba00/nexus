@@ -9,3 +9,4 @@ out
 .env.local
 *uploads/
 *settings.local.json
+CLAUDE.md
