@@ -4,7 +4,7 @@ export const PROTOCOL_VERSION = "0.15.3";
  * Minimum client version the server will accept.
  * Bump this when deploying breaking server changes that require a client update.
  */
-export const MIN_CLIENT_VERSION = "0.13.0";
+export const MIN_CLIENT_VERSION = "0.15.3";
 
 export const AUTH_ROUTES = {
   REGISTER: "/api/auth/register",
