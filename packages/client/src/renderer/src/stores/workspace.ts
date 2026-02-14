@@ -30,8 +30,8 @@ interface WorkspaceState {
 export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
-      workspaces: [],
-      activeWorkspaceId: null,
+      workspaces: [{ id: "default", name: "Migo", url: "https://migoserver.com" }],
+      activeWorkspaceId: "default",
 
       addWorkspace: (name, url) => {
         const workspace: Workspace = {

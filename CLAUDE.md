@@ -24,6 +24,19 @@ pnpm db:migrate          # Apply migrations (tsx src/db/migrate.ts)
 
 No test framework is configured yet.
 
+## Centralized Deployment (`deploy/`)
+
+The `deploy/` directory contains production config for the centralized server at `migoserver.com`:
+
+- **`docker-compose.yml`** — PostgreSQL + migo-server + Caddy (HTTPS reverse proxy). No LiveKit (uses LiveKit Cloud). No watchtower (CI/CD handles deploys).
+- **`Caddyfile`** — Reverse proxy config for `migoserver.com` → `migo-server:8080`. Caddy auto-provisions TLS.
+- **`.env.example`** — Production env template (JWT secrets, LiveKit Cloud creds, Postgres).
+- **`setup.sh`** — One-command VPS provisioning: installs Docker, downloads configs, generates secrets, starts services. Usage: `curl -fsSL .../deploy/setup.sh | bash`
+
+CI/CD: The `deploy` job in `.github/workflows/release.yml` SSHs into the VPS after the Docker image is pushed and runs `docker compose pull && up -d`. Requires `VPS_HOST` and `VPS_SSH_KEY` GitHub secrets.
+
+The client ships with a default workspace pointing to `https://migoserver.com`. New users land directly on the login screen.
+
 ## Self-Hosted Docker Deployment
 
 ```bash
