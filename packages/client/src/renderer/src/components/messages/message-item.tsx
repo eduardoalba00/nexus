@@ -178,12 +178,17 @@ export function MessageItem({ message, compact }: MessageItemProps) {
       return (
         <div className="space-y-1">
           <textarea
+            ref={(el) => {
+              if (el) {
+                el.focus();
+                el.setSelectionRange(el.value.length, el.value.length);
+              }
+            }}
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
             onKeyDown={handleEditKeyDown}
             className="w-full bg-muted border-none rounded-md px-2 py-1 text-sm resize-none outline-none"
             rows={1}
-            autoFocus
           />
           <p className="text-xs text-muted-foreground">
             Press Escape to cancel, Enter to save
@@ -244,12 +249,17 @@ export function MessageItem({ message, compact }: MessageItemProps) {
           {editing ? (
             <div className="space-y-1 mt-1">
               <textarea
+                ref={(el) => {
+                  if (el) {
+                    el.focus();
+                    el.setSelectionRange(el.value.length, el.value.length);
+                  }
+                }}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
                 onKeyDown={handleEditKeyDown}
                 className="w-full bg-muted border-none rounded-md px-2 py-1 text-sm resize-none outline-none"
                 rows={1}
-                autoFocus
               />
               <p className="text-xs text-muted-foreground">
                 Press Escape to cancel, Enter to save
