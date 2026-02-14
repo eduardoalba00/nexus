@@ -33,8 +33,10 @@ services:
           ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
 
   migo-server:
-    build: .
+    image: ghcr.io/eduardoalba00/migo-server:latest
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.scope=migo"
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,6 +55,18 @@ services:
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
       UPLOAD_DIR: /data/uploads
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 300
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_SCOPE: migo
+    labels:
+      - "com.centurylinklabs.watchtower.scope=migo"
 
 volumes:
   pgdata:

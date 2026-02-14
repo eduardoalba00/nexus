@@ -32,14 +32,14 @@ cp .env.example .env
 # Edit .env — generate secrets with: node -e "console.log(crypto.randomBytes(32).toString('hex'))"
 
 # 2. Start all services
-docker compose up -d --build
+docker compose up -d
 
 # 3. Stop
 docker compose down          # keeps data
 docker compose down -v       # removes volumes (fresh start)
 ```
 
-Services: PostgreSQL 17, LiveKit (voice), migo-server (port 8080). Migrations run automatically on startup. Data persists in Docker volumes (`pgdata`, `uploads`).
+Services: PostgreSQL 17, LiveKit (voice), migo-server (port 8080). The server image is pulled from GHCR (`ghcr.io/eduardoalba00/migo-server`). Watchtower automatically polls for new server images every 5 minutes. Migrations run automatically on startup. Data persists in Docker volumes (`pgdata`, `uploads`).
 
 ## Architecture
 

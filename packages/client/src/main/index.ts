@@ -129,10 +129,12 @@ function setupAutoUpdater(mainWindow: BrowserWindow): void {
     return app.getVersion();
   });
 
-  // Check for updates 5 seconds after launch
-  setTimeout(() => {
+  // Check for updates immediately on launch, then every 5 minutes
+  autoUpdater.checkForUpdates().catch(() => {});
+
+  setInterval(() => {
     autoUpdater.checkForUpdates().catch(() => {});
-  }, 5000);
+  }, 5 * 60 * 1000);
 }
 
 app.whenReady().then(() => {
