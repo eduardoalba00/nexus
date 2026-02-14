@@ -175,7 +175,8 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
   },
 
   toggleMute: () => {
-    const { isMuted } = get();
+    const { isMuted, currentChannelId, currentServerId } = get();
+    const newMuted = !isMuted;
     if (isMuted) {
       livekitManager.setMicEnabled(true);
       playUnmuteSound();
@@ -183,13 +184,28 @@ export const useVoiceStore = create<VoiceStoreState>()((set, get) => ({
       livekitManager.setMicEnabled(false);
       playMuteSound();
     }
-    set({ isMuted: !isMuted });
+    set({ isMuted: newMuted });
+
+    if (currentChannelId && currentServerId) {
+      wsManager.send({
+        op: WsOpcode.VOICE_STATE_UPDATE,
+        d: { channelId: currentChannelId, serverId: currentServerId, muted: newMuted, deafened: get().isDeafened },
+      });
+    }
   },
 
   toggleDeafen: () => {
-    const { isDeafened } = get();
-    livekitManager.setDeafened(!isDeafened);
-    set({ isDeafened: !isDeafened });
+    const { isDeafened, currentChannelId, currentServerId } = get();
+    const newDeafened = !isDeafened;
+    livekitManager.setDeafened(newDeafened);
+    set({ isDeafened: newDeafened });
+
+    if (currentChannelId && currentServerId) {
+      wsManager.send({
+        op: WsOpcode.VOICE_STATE_UPDATE,
+        d: { channelId: currentChannelId, serverId: currentServerId, muted: get().isMuted, deafened: newDeafened },
+      });
+    }
   },
 
   handleVoiceStateUpdate: (state: VoiceState) => {

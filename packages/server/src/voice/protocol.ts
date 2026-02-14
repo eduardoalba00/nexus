@@ -22,12 +22,22 @@ export function handleVoiceStateUpdate(
   connectionManager: ConnectionManager,
   db: AppDatabase,
 ): void {
-  const { channelId, serverId } = msg.d ?? {};
+  const { channelId, serverId, muted, deafened } = msg.d ?? {};
 
   // Handle leave first — serverId not needed since state manager tracks it
   if (!channelId) {
     handleLeave(userId, voiceState, connectionManager, db);
     return;
+  }
+
+  // Handle mute/deafen state update for an already-joined user
+  if (muted !== undefined || deafened !== undefined) {
+    const participant = voiceState.getParticipant(userId);
+    if (participant) {
+      voiceState.updateState(userId, muted ?? participant.muted, deafened ?? participant.deafened);
+      broadcastVoiceState(connectionManager, db, participant.serverId, userId, participant.channelId, false, voiceState);
+      return;
+    }
   }
 
   if (!serverId) return;
@@ -37,11 +47,11 @@ export function handleVoiceStateUpdate(
 
   // Broadcast leave from previous channel if applicable
   if (previousChannelId && previousChannelId !== channelId) {
-    broadcastVoiceState(connectionManager, db, serverId, userId, previousChannelId, true);
+    broadcastVoiceState(connectionManager, db, serverId, userId, previousChannelId, true, voiceState);
   }
 
   // Broadcast join to server members
-  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, false);
+  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, false, voiceState);
 }
 
 export function handleLeave(
@@ -68,7 +78,7 @@ export function handleLeave(
   }
 
   // Broadcast leave to server members
-  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, true);
+  broadcastVoiceState(connectionManager, db, serverId, userId, channelId, true, voiceState);
 }
 
 export async function handleVoiceSignal(
@@ -120,8 +130,10 @@ async function broadcastVoiceState(
   userId: string,
   channelId: string,
   left: boolean,
+  voiceState: VoiceStateManager,
 ): Promise<void> {
   const user = await db.select().from(users).where(eq(users.id, userId)).then(r => r[0]);
+  const participant = voiceState.getParticipant(userId);
 
   connectionManager.broadcastToServer(serverId, {
     op: WsOpcode.DISPATCH,
@@ -130,8 +142,8 @@ async function broadcastVoiceState(
       userId,
       channelId: left ? null : channelId,
       serverId,
-      muted: false,
-      deafened: false,
+      muted: participant?.muted ?? false,
+      deafened: participant?.deafened ?? false,
       username: user?.username ?? "",
       displayName: user?.displayName ?? "",
       avatarUrl: user?.avatarUrl ?? null,

@@ -71,6 +71,16 @@ export class VoiceStateManager {
     return Array.from(channelUsers.values());
   }
 
+  updateState(userId: string, muted: boolean, deafened: boolean): VoiceParticipant | null {
+    const channelId = this.userChannels.get(userId);
+    if (!channelId) return null;
+    const participant = this.channels.get(channelId)?.get(userId);
+    if (!participant) return null;
+    participant.muted = muted;
+    participant.deafened = deafened;
+    return participant;
+  }
+
   getChannelForUser(userId: string): string | null {
     return this.userChannels.get(userId) ?? null;
   }
