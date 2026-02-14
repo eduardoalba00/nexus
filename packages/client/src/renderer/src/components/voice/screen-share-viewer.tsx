@@ -2,6 +2,36 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Maximize2, Minimize2, ArrowLeft } from "lucide-react";
 import { useVoiceStore } from "@/stores/voice";
 
+function useTrackStats(track: MediaStreamTrack) {
+  const [stats, setStats] = useState<{ width: number; height: number; fps: number } | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const s = track.getSettings();
+      if (s.width && s.height) {
+        setStats({ width: s.width, height: s.height, fps: s.frameRate ?? 0 });
+      }
+    };
+    // Settings may not be available immediately on remote tracks
+    update();
+    const id = setInterval(update, 2000);
+    return () => clearInterval(id);
+  }, [track]);
+
+  return stats;
+}
+
+function StatsOverlay({ track, className }: { track: MediaStreamTrack; className?: string }) {
+  const stats = useTrackStats(track);
+  if (!stats) return null;
+
+  return (
+    <div className={`bg-black/60 text-white text-xs font-medium px-2 py-1 rounded ${className ?? ""}`}>
+      {stats.width}x{stats.height}{stats.fps ? ` ${Math.round(stats.fps)}fps` : ""}
+    </div>
+  );
+}
+
 interface ScreenShareTileProps {
   track: MediaStreamTrack;
   sharerName: string;
@@ -40,6 +70,7 @@ function ScreenShareTile({ track, sharerName, onClick, showClickHint }: ScreenSh
       <div className="absolute top-2 left-2 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded">
         {sharerName}
       </div>
+      <StatsOverlay track={track} className="absolute top-2 right-2" />
       {showClickHint && (
         <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20">
           <span className="bg-black/70 text-white text-sm px-3 py-1.5 rounded-md">
@@ -106,7 +137,8 @@ function FocusedView({
           {sharerName} is sharing their screen
         </div>
       </div>
-      <div className="absolute top-3 right-3 flex gap-1">
+      <div className="absolute top-3 right-3 flex items-center gap-1">
+        <StatsOverlay track={track} />
         <button
           onClick={onToggleFullscreen}
           className="bg-black/60 hover:bg-black/80 text-white p-1.5 rounded transition-colors"
